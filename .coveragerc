@@ -1,10 +1,19 @@
 # .coveragerc to control coverage.py
 [run]
 branch = True
-source = fmcwp
-# omit = bad_file.py
+source =
+    fmxml
+    tests
+omit =
+    conftest.py
+    conf.py
+    setup.py
 
 [report]
+omit =
+    setup.py
+    conftest.py
+    conf.py
 # Regexes for lines to exclude from consideration
 exclude_lines =
     # Have to re-enable the standard pragma
