@@ -4,18 +4,24 @@ from collections import namedtuple
 from .base_command import BaseCommand
 from .mixins import RecordIdMixin
 
-EditList = namedtuple('EditList', 'fqfn value')
+EditField = namedtuple('EditField', 'fqfn value')
 
 
 class EditCommand(RecordIdMixin, BaseCommand):
-    """Handles the *-edit* command"""
-    __slots__ = ['__mod_id', '__edit_list', '__delete_related', ]
+    """
+    –edit (Edit record) query command
+    """
+    __slots__ = ['__mod_id', '__fields_list', '__delete_related', ]
 
-    def __init__(self, fms, layout_name):
+    def __init__(self, fms, layout_name, record_id):
         super().__init__(fms, layout_name)
+
+        assert isinstance(record_id, int)
+        self.set_record_id(record_id, _oneshot=True)
+
         self.__mod_id = \
             self.__delete_related = None
-        self.__edit_list = []
+        self.__fields_list = []
 
     def get_query(self):
         assert self.record_id is not None
@@ -30,8 +36,8 @@ class EditCommand(RecordIdMixin, BaseCommand):
         if self.__delete_related is not None:
             command_params['-delete.related'] = self.__delete_related
 
-        for edit in self.__edit_list:
-            command_params[edit.fqfn] = edit.value
+        for field in self.__fields_list:
+            command_params[field.fqfn] = field.value
 
         command_params['-edit'] = None
         return self.urlencode_query(command_params)
@@ -59,5 +65,5 @@ class EditCommand(RecordIdMixin, BaseCommand):
         assert delete_related is None or isinstance(delete_related, str)
         self.__delete_related = delete_related
 
-    def add_edit(self, fqfn, value):
-        self.__edit_list.append(EditList(fqfn, value))
+    def add_edit_field(self, fqfn, value):
+        self.__fields_list.append(EditField(fqfn, value))

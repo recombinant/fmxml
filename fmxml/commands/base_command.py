@@ -5,7 +5,8 @@ from .command_container import CommandContainer, Command
 
 
 class BaseCommand:
-    """Base for command classes.
+    """
+    Base for command classes.
 
     This class must be on the right any mixins so that it is at the end of the
     mro."""
@@ -42,7 +43,8 @@ class BaseCommand:
             # command parameters
             # not HTML so safe can be extended for debugging if necessary
             # safe = '(),;!<>'
-            start = urllib.parse.urlencode(start, safe='', encoding='utf-8')
+            start = urllib.parse.urlencode(start, safe=':/ ', encoding='utf-8',
+                                           quote_via=urllib.parse.quote)
 
         if end:
             # command verb, there should only be one

@@ -2,7 +2,7 @@
 from collections import namedtuple, OrderedDict
 
 from .base_command import BaseCommand
-from .mixins import RecordIdMixin
+from .mixins import RecordIdMixin, ScriptMixin, PreFindScriptMixin, PreSortScriptMixin
 from ..fms import FMS_FIND_AND, FMS_FIND_OR
 from ..fms import \
     FMS_FIND_OP_EQ, FMS_FIND_OP_NEQ, \
@@ -16,8 +16,16 @@ FindCriteria = namedtuple('FindCriteria', 'field_name test_value op')
 SortOrder = namedtuple('SortOrder', 'precedence order')
 
 
-class FindCommand(RecordIdMixin, BaseCommand):
-    """Handles the *-find* and *-findall* commands."""
+class FindCommand(RecordIdMixin,
+                  ScriptMixin,
+                  PreFindScriptMixin,
+                  PreSortScriptMixin,
+                  BaseCommand):
+    """
+    –find or –findall (Find records) query commands
+
+    Automatically selects *-find* or *-findall* as appropriate.
+    """
     __slots__ = ['__logical_operator',
                  '__skip', '__max',
                  '__lay_response',

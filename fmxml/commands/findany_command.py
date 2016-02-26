@@ -3,7 +3,9 @@ from .base_command import BaseCommand
 
 
 class FindAnyCommand(BaseCommand):
-    """Handles the *-findany* command"""
+    """
+    –findany (Find random record) query commands
+    """
 
     def __init__(self, fms, layout_name):
         super().__init__(fms, layout_name)
