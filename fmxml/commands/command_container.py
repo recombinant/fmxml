@@ -42,6 +42,7 @@ class CommandContainer:
     >>> len(cc)
     3
     """
+
     def __init__(self, *commands):
         self.__data = []
         for command in commands:
@@ -74,7 +75,6 @@ class CommandContainer:
     # TODO: development code
     def __delitem__(self, key):
         # Check that there is only one.
-
         counter = Counter(map(attrgetter('cmd'), self.__data))
         assert counter[key] == 1
 
@@ -89,4 +89,5 @@ class CommandContainer:
 
     # TODO: development code
     def has_cmd(self, cmd):
+        assert isinstance(cmd, str)
         return any(command.cmd == cmd for command in self.__data)

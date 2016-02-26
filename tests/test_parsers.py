@@ -1,9 +1,8 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python3
+# -*- mode: python tab-width: 4 coding: utf-8 -*-
 import logging
 from pathlib import Path
 
-from fmxml.fms import FileMakerServer as FMS
 from fmxml.parsers.data_grammar import DataGrammarParser
 from fmxml.parsers.data_grammar2 import DataGrammar2Parser
 from fmxml.parsers.info_grammar import InfoGrammarParser
@@ -13,10 +12,6 @@ __copyright__ = "recombinant"
 __license__ = "BSD"
 
 logging.basicConfig(level=logging.DEBUG)
-
-
-def test_fms():
-    assert FMS().log
 
 
 def test_data_grammar_db():
@@ -89,4 +84,3 @@ def _get_data_grammar_from_file(path):
     fmresultset = parser.parse(xml_bytes)
     assert fmresultset
     return fmresultset
-
