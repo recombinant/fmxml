@@ -1,8 +1,7 @@
 # -*- mode: python tab-width: 4 coding: utf-8 -*-
-import urllib.parse
 from collections import namedtuple, OrderedDict
 
-from .command_container import CommandContainer, Command
+from .base_command import BaseCommand
 from ..fms import FMS_FIND_AND, FMS_FIND_OR
 from ..fms import \
     FMS_FIND_OP_EQ, FMS_FIND_OP_NEQ, \
@@ -16,16 +15,14 @@ FindCriteria = namedtuple('FindCriteria', 'field_name test_value op')
 SortOrder = namedtuple('SortOrder', 'precedence order')
 
 
-class FindCommand:
+class FindCommand(BaseCommand):
+    """Handles the *-find* and *-findall* commands."""
     __slots__ = ['__record_id', '__logical_operator',
                  '__skip', '__max', '__sort_fields',
-                 '__find_criteria',
-                 '__fms', '__layout_name']
+                 '__find_criteria', ]
 
     def __init__(self, fms, layout_name):
-        assert isinstance(layout_name, str)
-        self.__fms = fms
-        self.__layout_name = layout_name
+        super().__init__(fms, layout_name)
 
         self.__record_id = \
             self.__max = \
@@ -35,10 +32,7 @@ class FindCommand:
         self.__sort_fields = OrderedDict()
 
     def get_query(self):
-        command_params = CommandContainer(
-            Command('-db', self.__fms.get_property('db')),
-            Command('-lay', self.__layout_name),
-        )
+        command_params = super().get_command_params()
 
         if self.__record_id is not None:
             command_params['-recid'] = str(self.__record_id)
@@ -78,32 +72,7 @@ class FindCommand:
         else:
             command_params['-find'] = None
 
-        start, end = [], []
-        # URL encode the query, but don't put =arg on the trailing "command"
-        for cmd, arg in command_params:
-            assert isinstance(cmd, str)
-            assert isinstance(arg, (str, int, type(None)))
-            if arg is not None:
-                start.append((cmd, arg))  # cmd=arg
-            else:
-                end.append(cmd)  # cmd
-
-        if start:
-            # command parameters
-            # not HTML so safe can be extended for debugging if necessary
-            # safe = '(),;!<>'
-            start = urllib.parse.urlencode(start, safe='', encoding='utf-8')
-
-        if end:
-            # command verb, there should only be one
-            assert len(end) == 1
-            # ASCII - therefore no encoding needed
-            end = end[-1]
-
-        if start and end:
-            return '&'.join([start, end])
-
-        raise AssertionError('Invalid command parameter sequence')  # pragma: no cover
+        return self.urlencode_query(command_params)
 
     @property
     def record_id(self):

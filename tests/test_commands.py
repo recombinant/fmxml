@@ -10,6 +10,7 @@ from fmxml import \
     FMS_FIND_OP_CN, \
     FMS_FIND_OP_BW, FMS_FIND_OP_EW
 from fmxml import FileMakerServer, FMS_SORT_ASCEND, FMS_SORT_DESCEND
+from fmxml.commands.findany_command import FindAnyCommand
 from fmxml.commands.find_command import FindCommand
 from fmxml.fms import FMS_FIND_AND
 
@@ -312,7 +313,10 @@ def test_cwp_01():
     query = find_command.get_query()
     assert query == '-db=employees&-lay=family&-findall'
 
-    # TODO: assert query == '-db=employees&-lay=family&-findany'
+    find_command = FindAnyCommand(fms, 'family')
+    query = find_command.get_query()
+    assert query == '-db=employees&-lay=family&-findany'
+
     # TODO: assert query == '-db=employees&-lay=family&-recid=1001&-delete'
     # TODO: assert query == '-db=employees&-lay=family&-recid=1001&-delete.related=Dependents.3&-edit'
     # TODO: assert query == '-db=employees&-lay=family&-recid=1001&Dependents::Names.0=Timothy&-edit'
