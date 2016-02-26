@@ -2,6 +2,7 @@
 from collections import namedtuple, OrderedDict
 
 from .base_command import BaseCommand
+from .mixins import RecordIdMixin
 from ..fms import FMS_FIND_AND, FMS_FIND_OR
 from ..fms import \
     FMS_FIND_OP_EQ, FMS_FIND_OP_NEQ, \
@@ -15,17 +16,16 @@ FindCriteria = namedtuple('FindCriteria', 'field_name test_value op')
 SortOrder = namedtuple('SortOrder', 'precedence order')
 
 
-class FindCommand(BaseCommand):
+class FindCommand(RecordIdMixin, BaseCommand):
     """Handles the *-find* and *-findall* commands."""
-    __slots__ = ['__record_id', '__logical_operator',
+    __slots__ = ['__logical_operator',
                  '__skip', '__max', '__sort_fields',
                  '__find_criteria', ]
 
     def __init__(self, fms, layout_name):
         super().__init__(fms, layout_name)
 
-        self.__record_id = \
-            self.__max = \
+        self.__max = \
             self.__logical_operator = None
         self.__skip = 0
         self.__find_criteria = []  # list of FindCriteria
@@ -34,8 +34,6 @@ class FindCommand(BaseCommand):
     def get_query(self):
         command_params = super().get_command_params()
 
-        if self.__record_id is not None:
-            command_params['-recid'] = str(self.__record_id)
         if self.__logical_operator is not None:
             command_params['-lop'] = self.__logical_operator
         if self.__skip:
@@ -67,26 +65,12 @@ class FindCommand(BaseCommand):
             if order is not None:
                 command_params['-sortorder.{}'.format(precedence)] = order
 
-        if self.__record_id is None and not self.__find_criteria:
+        if self.record_id is None and not self.__find_criteria:
             command_params['-findall'] = None
         else:
             command_params['-find'] = None
 
         return self.urlencode_query(command_params)
-
-    @property
-    def record_id(self):
-        return self.__record_id
-
-    def set_record_id(self, record_id=None):
-        """
-        –recid (Record ID) query parameter
-
-        Args:
-            record_id (int, optional): A record id. Defaults to None which means all records.
-        """
-        assert record_id is None or isinstance(record_id, int)
-        self.__record_id = record_id
 
     @property
     def skip(self):

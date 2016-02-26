@@ -10,8 +10,9 @@ from fmxml import \
     FMS_FIND_OP_CN, \
     FMS_FIND_OP_BW, FMS_FIND_OP_EW
 from fmxml import FileMakerServer, FMS_SORT_ASCEND, FMS_SORT_DESCEND
-from fmxml.commands.findany_command import FindAnyCommand
+from fmxml.commands.edit_command import EditCommand
 from fmxml.commands.find_command import FindCommand
+from fmxml.commands.findany_command import FindAnyCommand
 from fmxml.fms import FMS_FIND_AND
 
 
@@ -222,6 +223,25 @@ def test_05_find_command_find_criteria(fms, layout_name):
            '-find'
 
 
+def test_07_edit_command(fms, layout_name):
+    edit_command = EditCommand(fms, layout_name)
+    edit_command.set_record_id(12)
+    assert edit_command.mod_id is None
+    edit_command.set_mod_id(2)
+    assert edit_command.mod_id == 2
+    edit_command.set_mod_id(3)
+    assert edit_command.mod_id == 3
+    edit_command.add_edit('Title', 'Unknown 24/7')
+    query = edit_command.get_query()
+    assert urllib.parse.unquote_plus(query) == \
+           '-db=FMPHP_Sample&' \
+           '-lay=Form View&' \
+           '-recid=12&' \
+           '-modid=3&' \
+           'Title=Unknown 24/7&' \
+           '-edit'
+
+
 # These queries are from the Custom Web Publishing guide.
 # https://fmhelp.filemaker.com/docs/14/en/fms14_cwp_guide.pdf
 #
@@ -262,14 +282,28 @@ def test_cwp_01():
     query = find_command.get_query()
     assert query == '-db=employees&-lay=departments&-max=all&-findall'
 
-    # find_command = FindCommand(fms, 'departments')
-    # find_command.add_find_criterion('FirstName', 'Sam', FMS_FIND_OP_EQ)
-    # find_command.set_max(10)
-    # assert query == '-db=employees&-lay=departments&-op=eq&FirstName=Sam&-max=1&-find'
-    # TODO: assert query == '-db=employees&-lay=departments&-recid=13&Country=USA&-edit'
+    find_command = FindCommand(fms, 'departments')
+    find_command.add_find_criterion('FirstName', 'Sam', FMS_FIND_OP_EQ)
+    find_command.set_max(1)
+    query = find_command.get_query()
+    assert query == '-db=employees&-lay=departments&-max=1&FirstName=Sam&FirstName.op=eq&-find'
+
+    edit_command = EditCommand(fms, 'departments')
+    edit_command.set_record_id(13)
+    edit_command.add_edit('Country', 'USA')
+    query = edit_command.get_query()
+    assert query == '-db=employees&-lay=departments&-recid=13&Country=USA&-edit'
+
     # TODO: assert query == '-db=employees&-lay=departments&-recid=14&-dup'
     # TODO: assert query == '-db=employees&-lay=departments&-recid=22&-delete'
-    # TODO: assert query == '-db=employees&-lay=departments&-recid=22&-modid=6&last_name=Jones&-edit'
+
+    edit_command = EditCommand(fms, 'departments')
+    edit_command.set_record_id(22)
+    edit_command.set_mod_id(6)
+    edit_command.add_edit('last_name', 'Jones')
+    query = edit_command.get_query()
+    assert query == '-db=employees&-lay=departments&-recid=22&-modid=6&last_name=Jones&-edit'
+
     # TODO: assert query == '-db=employees&-lay=departments&-recid=4&-delete'
     # assert query == '-db=employees&-lay=departments&-script.prefind=myscript&-findall'
     # assert query == '-db=employees&-lay=departments&-script.prefind=myscript&-script.prefind.param=payroll&-findall'
@@ -283,12 +317,32 @@ def test_cwp_01():
     find_command.set_max(5)
 
     query = find_command.get_query()
-    assert query == '-db=employees&-lay=departments&-skip=10&-max=5&-findall'
+    assert query == '-db=employees&' \
+                    '-lay=departments&' \
+                    '-skip=10&' \
+                    '-max=5&' \
+                    '-findall'
 
     # TODO: assert query == '-db=employees&-lay=departments&-view'
-    # TODO: assert query == '-db=employees&-lay=departments&Country.global=USA&-recid=1&-edit'
+
+
+    edit_command = EditCommand(fms, 'departments')
+    edit_command.set_record_id(1)
+    edit_command.add_edit('Country.global', 'USA')
+    query = edit_command.get_query()
+    assert query == '-db=employees&' \
+                    '-lay=departments&' \
+                    '-recid=1&' \
+                    'Country.global=USA&' \
+                    '-edit'
+
     # TODO: assert query == '-db=employees&-lay=departments&Country=Australia&-new'
-    # assert query == '-db=employees&-lay=departments&IDnum=915...925&-find'
+
+
+    find_command = FindCommand(fms, 'departments')
+    find_command.add_find_criterion('IDnum', '915...925')
+    query = find_command.get_query()
+    assert query == '-db=employees&-lay=departments&IDnum=915...925&-find'
 
     find_command = FindCommand(fms, 'departments')
     find_command.set_logical_operator(FMS_FIND_AND)
@@ -313,15 +367,43 @@ def test_cwp_01():
     query = find_command.get_query()
     assert query == '-db=employees&-lay=family&-findall'
 
-    find_command = FindAnyCommand(fms, 'family')
-    query = find_command.get_query()
+    findany_command = FindAnyCommand(fms, 'family')
+    query = findany_command.get_query()
     assert query == '-db=employees&-lay=family&-findany'
 
     # TODO: assert query == '-db=employees&-lay=family&-recid=1001&-delete'
     # TODO: assert query == '-db=employees&-lay=family&-recid=1001&-delete.related=Dependents.3&-edit'
-    # TODO: assert query == '-db=employees&-lay=family&-recid=1001&Dependents::Names.0=Timothy&-edit'
-    # TODO: assert query == '-db=employees&-lay=family&-recid=1001&Dependents::Names.2=Kevin&-edit'
-    # TODO: assert query == '-db=employees&-lay=family&-recid=1001&Dependents::Names.2=Kevin&Dependents::Names.5=Susan&-edit'
+
+    edit_command = EditCommand(fms, 'family')
+    edit_command.set_record_id(1001)
+    edit_command.add_edit('Dependents::Names.0', 'Timothy')
+    query = edit_command.get_query()
+    assert urllib.parse.unquote_plus(
+        query) == '-db=employees&-lay=family&-recid=1001&Dependents::Names.0=Timothy&-edit'
+
+    edit_command = EditCommand(fms, 'family')
+    edit_command.set_record_id(1001)
+    edit_command.add_edit('Dependents::Names.2', 'Kevin')
+    query = edit_command.get_query()
+    assert urllib.parse.unquote_plus(query) == \
+           '-db=employees&' \
+           '-lay=family&' \
+           '-recid=1001&' \
+           'Dependents::Names.2=Kevin&' \
+           '-edit'
+
+    edit_command = EditCommand(fms, 'family')
+    edit_command.set_record_id(1001)
+    edit_command.add_edit('Dependents::Names.2', 'Kevin')
+    edit_command.add_edit('Dependents::Names.5', 'Susan')
+    query = edit_command.get_query()
+    assert urllib.parse.unquote_plus(query) == \
+           '-db=employees&' \
+           '-lay=family&' \
+           '-recid=1001&' \
+           'Dependents::Names.2=Kevin&' \
+           'Dependents::Names.5=Susan&' \
+           '-edit'
 
     find_command = FindCommand(fms, 'family')
     find_command.set_record_id(427)
