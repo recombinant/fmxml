@@ -5,15 +5,16 @@ import urllib.parse
 
 import pytest
 
+from fmxml import FMS_FIND_AND
 from fmxml import \
     FMS_FIND_OP_EQ, FMS_FIND_OP_NEQ, \
-    FMS_FIND_OP_CN, \
+    FMS_FIND_OP_GT, FMS_FIND_OP_CN, \
     FMS_FIND_OP_BW, FMS_FIND_OP_EW
-from fmxml import FileMakerServer, FMS_SORT_ASCEND, FMS_SORT_DESCEND
+from fmxml import FMS_SORT_ASCEND, FMS_SORT_DESCEND
+from fmxml import FileMakerServer
 from fmxml.commands.edit_command import EditCommand
 from fmxml.commands.find_command import FindCommand
 from fmxml.commands.findany_command import FindAnyCommand
-from fmxml.fms import FMS_FIND_AND
 
 
 @pytest.fixture(scope='module')
@@ -265,12 +266,18 @@ def test_cwp_01():
     find_command = FindCommand(fms, 'departments')
     find_command.set_skip(10)
     find_command.set_max(5)
-
     query = find_command.get_query()
-    assert query == '-db=employees&-lay=departments&-skip=10&-max=5&-findall'
+    assert query == '-db=employees&' \
+                    '-lay=departments&' \
+                    '-skip=10&' \
+                    '-max=5&' \
+                    '-findall'
 
-    # TODO: assert query == '-db=career&-lay=applications&-recid=7&-delete.related=jobtable.20&-edit'
-    # TODO: assert query == '-db=employees&-lay=Budget&Salary=100000&Salary.op=gt&-find&-lay.response=ExecList'
+    find_command = FindCommand(fms, 'Budget')
+    find_command.add_find_criterion('Salary', '100000', FMS_FIND_OP_GT)
+    find_command.set_lay_response('ExecList')
+    query = find_command.get_query()
+    assert query == '-db=employees&-lay=Budget&-lay.response=ExecList&Salary=100000&Salary.op=gt&-find'
 
     find_command = FindCommand(fms, 'departments')
     find_command.set_max(10)
@@ -434,11 +441,24 @@ def test_cwp_01():
     # TODO: assert query == '-db=employees&-layoutnames'
     # TODO: assert query == '-db=employees&-scriptnames'
 
+def test_cwp_02():
+    fms = FileMakerServer(log_level=logging.DEBUG)
+    fms.set_property('db', 'career')
+
+    edit_command = EditCommand(fms, 'applications')
+    edit_command.set_record_id(7)
+    edit_command.set_delete_related('jobtable.20')
+    query = edit_command.get_query()
+    assert query == '-db=career&-lay=applications&-recid=7&-delete.related=jobtable.20&-edit'
+
+
+
     # TODO: assert query == '-db=FMPHP_Sample&-lay=English&-relatedsets.filter=layout&-relatedsets.max=10&-findany'
     # TODO: assert query == '-db=FMPHP_Sample&-lay=English&-relatedsets.filter=layout&-relatedsets.max=all&-findany'
     # TODO: assert query == '-db=FMPHP_Sample&-lay=English&-relatedsets.filter=none&-findany'
     # TODO: assert query == '-db=members&-lay=relationships&-recid=2&info=fiancée&-edit'
     # TODO: assert query == '-db=petclinic&-lay=Patients&-query=(q1, q2);!(q3)&-q1=typeofanimal&-q1.value=Cat&-q2=color&-q2.value=Gray&-q3=name&-q3.value=Fluffy&-findquery'
+
 
 
 def test_cwp_04():

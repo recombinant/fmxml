@@ -19,14 +19,16 @@ SortOrder = namedtuple('SortOrder', 'precedence order')
 class FindCommand(RecordIdMixin, BaseCommand):
     """Handles the *-find* and *-findall* commands."""
     __slots__ = ['__logical_operator',
-                 '__skip', '__max', '__sort_fields',
-                 '__find_criteria', ]
+                 '__skip', '__max',
+                 '__lay_response',
+                 '__sort_fields', '__find_criteria', ]
 
     def __init__(self, fms, layout_name):
         super().__init__(fms, layout_name)
 
         self.__max = \
-            self.__logical_operator = None
+            self.__logical_operator = \
+            self.__lay_response = None
         self.__skip = 0
         self.__find_criteria = []  # list of FindCriteria
         self.__sort_fields = OrderedDict()
@@ -38,8 +40,10 @@ class FindCommand(RecordIdMixin, BaseCommand):
             command_params['-lop'] = self.__logical_operator
         if self.__skip:
             command_params['-skip'] = self.__skip
-        if self.__max:
+        if self.__max is not None:
             command_params['-max'] = self.__max
+        if self.__lay_response is not None:
+            command_params['-lay.response'] = self.__lay_response
 
         for field_name, test_value, op in self.__find_criteria:
             command_params[field_name] = test_value
@@ -77,8 +81,7 @@ class FindCommand(RecordIdMixin, BaseCommand):
         return self.__skip
 
     def set_skip(self, skip=0):
-        """
-        –skip (Skip records) query parameter
+        """–skip (Skip records) query parameter
 
         Args:
             skip (int): Specifies how many records to skip in the found set. Defaults to zero.
@@ -91,8 +94,7 @@ class FindCommand(RecordIdMixin, BaseCommand):
         return self.__max
 
     def set_max(self, max_=None):
-        """
-        –max (Maximum records) query parameter
+        """–max (Maximum records) query parameter
 
         Args:
             max_ (int, str, optional): Maximum number of records to return. Defaults to all.
@@ -105,8 +107,7 @@ class FindCommand(RecordIdMixin, BaseCommand):
         return self.__logical_operator
 
     def set_logical_operator(self, logical_operator):
-        """
-        –lop (Logical operator) query parameter
+        """–lop (Logical operator) query parameter
 
         Args:
             logical_operator: Either FMS_FIND_AND, FMS_FIND_OR or None
@@ -115,9 +116,17 @@ class FindCommand(RecordIdMixin, BaseCommand):
         if logical_operator in {FMS_FIND_AND, FMS_FIND_OR, None}:
             self.__logical_operator = logical_operator
 
-    def add_sort_rule(self, field_name, precedence, order=None):
+    def set_lay_response(self, lay_response=None):
+        """–lay.response (Switch layout for response) query parameter
+
+        Args:
+            lay_response (str, optional): Layout to switch to for XML response.
         """
-        –sortfield (Sort field) query parameter
+        assert lay_response is None or isinstance(lay_response, str)
+        self.__lay_response = lay_response
+
+    def add_sort_rule(self, field_name, precedence, order=None):
+        """–sortfield (Sort field) query parameter
 
         -sortfield.precedence-number=fully-qualified-field-name
 
