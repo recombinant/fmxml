@@ -7,5 +7,7 @@ from .fms import \
     FMS_FIND_OP_LT, FMS_FIND_OP_LTE, \
     FMS_FIND_OP_CN, \
     FMS_FIND_OP_BW, FMS_FIND_OP_EW
+from .fms import FMS_RELATEDSETS_FILTER_LAYOUT, FMS_RELATEDSETS_FILTER_NONE
+
 
 from .fms import FileMakerServer

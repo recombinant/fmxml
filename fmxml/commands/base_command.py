@@ -43,7 +43,7 @@ class BaseCommand:
             # command parameters
             # not HTML so safe can be extended for debugging if necessary
             # safe = '(),;!<>'
-            start = urllib.parse.urlencode(start, safe=':/ ', encoding='utf-8',
+            start = urllib.parse.urlencode(start, safe='!():;,/ ', encoding='utf-8',
                                            quote_via=urllib.parse.quote)
 
         if end:

@@ -21,6 +21,10 @@ FMS_FIND_OP_CN = 'cn'  # *word*
 FMS_FIND_OP_BW = 'bw'  # word*
 FMS_FIND_OP_EW = 'ew'  # *word
 
+# for -relatedsets.filter
+FMS_RELATEDSETS_FILTER_LAYOUT = 'layout'
+FMS_RELATEDSETS_FILTER_NONE = 'none'
+
 
 class FileMakerServer:
     __slots__ = ['__log', '__prop_lookup', ]

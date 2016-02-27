@@ -9,19 +9,20 @@ EditField = namedtuple('EditField', 'fqfn value')
 
 class EditCommand(RecordIdMixin, BaseCommand):
     """
-    –edit (Edit record) query command
+    -edit (Edit record) query command
     """
-    __slots__ = ['__mod_id', '__fields_list', '__delete_related', ]
+    __slots__ = ['__mod_id', '__fqfn_list', '__delete_related', ]
 
     def __init__(self, fms, layout_name, record_id):
         super().__init__(fms, layout_name)
 
+        # TODO: test if fqfn with record-id is Ok (record_id parameter not required?)
         assert isinstance(record_id, int)
         self.set_record_id(record_id, _oneshot=True)
 
         self.__mod_id = \
             self.__delete_related = None
-        self.__fields_list = []
+        self.__fqfn_list = []
 
     def get_query(self):
         assert self.record_id is not None
@@ -36,7 +37,7 @@ class EditCommand(RecordIdMixin, BaseCommand):
         if self.__delete_related is not None:
             command_params['-delete.related'] = self.__delete_related
 
-        for field in self.__fields_list:
+        for field in self.__fqfn_list:
             command_params[field.fqfn] = field.value
 
         command_params['-edit'] = None
@@ -65,5 +66,22 @@ class EditCommand(RecordIdMixin, BaseCommand):
         assert delete_related is None or isinstance(delete_related, str)
         self.__delete_related = delete_related
 
-    def add_edit_field(self, fqfn, value):
-        self.__fields_list.append(EditField(fqfn, value))
+    def add_edit_fqfn(self, fqfn, value):
+        """
+        Fully Qualified Field Name
+
+        *table-name::field-name(repetition-number).record-id*
+
+        - *record-id* is only required for portal records.
+        - *table-name* is only required if the field is not in the underlying
+          table of the layout specified in the query string.
+        - *repetition-number* is required for repeating fields.
+
+        Just the *field-name* should be adequate for on-layout non-repeating
+        fields.
+
+        Args:
+            fqfn: Fully qualified field name.
+            value: Value of the field.
+        """
+        self.__fqfn_list.append(EditField(fqfn, value))

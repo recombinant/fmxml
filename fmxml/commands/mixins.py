@@ -1,4 +1,7 @@
 # -*- mode: python tab-width: 4 coding: utf-8 -*-
+from collections import OrderedDict, namedtuple
+
+from ..fms import FMS_SORT_ASCEND, FMS_SORT_DESCEND
 
 
 class RecordIdMixin:
@@ -24,7 +27,7 @@ class RecordIdMixin:
 
         Args:
             record_id (int, optional): A record id. Defaults to None which means all records.
-            _remove (bool): Internal use only.
+            _oneshot (bool): Internal use only.
         """
         assert record_id is None \
                or (isinstance(record_id, int) and record_id > 0)
@@ -122,3 +125,147 @@ class PreSortScriptMixin:
 
     def set_presort_script(self, script_name, *script_params):
         self.__script_details.add_script(script_name, *script_params)
+
+
+class FoundSetMixin:
+    def __init__(self, fms, layout_name):
+        super().__init__(fms, layout_name)
+        self.__max = None
+        self.__skip = 0
+
+    def get_command_params(self):
+        command_params = super().get_command_params()
+
+        if self.__skip:
+            command_params['-skip'] = self.__skip
+        if self.__max is not None:
+            command_params['-max'] = self.__max
+
+        return command_params
+
+    @property
+    def skip(self):
+        return self.__skip
+
+    def set_skip(self, skip=0):
+        """–skip (Skip records) query parameter
+
+        Args:
+            skip (int): Specifies how many records to skip in the found set. Defaults to zero.
+        """
+        assert isinstance(skip, int) and skip >= 0
+        self.__skip = skip
+
+    @property
+    def max(self):
+        return self.__max
+
+    def set_max(self, max_=None):
+        """–max (Maximum records) query parameter
+
+        Args:
+            max_ (int, str, optional): Maximum number of records to return. Defaults to all.
+        """
+        assert max_ is None or max_ == 'all' or (isinstance(max_, int) and max_ >= 0)
+        self.__max = max_
+
+
+class RelatedsSetMixin:
+    """
+    -relatedsets.filter (Filter portal records) query parameter
+
+    -relatedsets.max (Limit portal records) query parameter
+    """
+
+    def __init__(self, fms, layout_name):
+        super().__init__(fms, layout_name)
+        self.__relatedsets_filter = None
+        self.__relatedsets_max = None
+
+    def set_relatedsets_filter(self, filter=None):
+        from ..fms import \
+            FMS_RELATEDSETS_FILTER_LAYOUT, FMS_RELATEDSETS_FILTER_NONE
+
+        assert filter is None or \
+               filter in {FMS_RELATEDSETS_FILTER_LAYOUT,
+                          FMS_RELATEDSETS_FILTER_NONE}
+        self.__relatedsets_filter = filter
+
+    def set_relatedsets_max(self, max_=None):
+        assert max is None or max_ == 'all' or (isinstance(max_, int) and max_ >= 0)
+        self.__relatedsets_max = max_
+
+    def get_command_params(self):
+        command_params = super().get_command_params()
+
+        if self.__relatedsets_filter is not None:
+            command_params['-relatedsets.filter'] = self.__relatedsets_filter
+            if self.__relatedsets_max is not None:
+                command_params['-relatedsets.max'] = self.__relatedsets_max
+
+        return command_params
+
+
+SortOrder = namedtuple('SortOrder', 'precedence order')
+
+
+class SortRuleMixin:
+    def __init__(self, fms, layout_name):
+        super().__init__(fms, layout_name)
+        self.__sort_fields = OrderedDict()
+
+    def get_command_params(self):
+        command_params = super().get_command_params()
+
+        sort_precedence = {}
+        for field_name in self.__sort_fields:
+            precedence = self.__sort_fields[field_name].precedence
+            order = self.__sort_fields[field_name].order
+            sort_precedence[precedence] = (field_name, order)
+        for precedence in sorted(list(sort_precedence)):
+            field_name, order = sort_precedence[precedence]
+            command_params['-sortfield.{}'.format(precedence)] = field_name
+            if order is not None:
+                command_params['-sortorder.{}'.format(precedence)] = order
+
+        return command_params
+
+    def add_sort_rule(self, field_name, precedence, order=None):
+        """–sortfield (Sort field) query parameter
+
+        -sortfield.precedence-number=fully-qualified-field-name
+
+        Args:
+          field_name (str, None): Fully qualified field name to sort on. None if
+          precedence (int, None): Integer from 1 to 9 inclusive.
+          order (str, optional): Direction of sort. If not supplied FileMaker
+            will silently default to ascending order.
+        """
+        assert field_name is None or isinstance(field_name, str)
+        assert isinstance(precedence, int) and 0 < precedence <= 9
+        assert order in {FMS_SORT_ASCEND, FMS_SORT_DESCEND, None}
+
+        # Remove anything with the same precedence.
+        # Maximum of 9 items, so brute force is Ok.
+        for tmp_field_name in list(self.__sort_fields.keys()):
+            if self.__sort_fields[tmp_field_name].precedence == precedence:
+                del self.__sort_fields[tmp_field_name]
+
+        self.__sort_fields[field_name] = SortOrder(precedence, order)
+        self.__sort_fields.move_to_end(field_name)  # LIFO
+
+    def del_sort_rule(self, field_name):
+        """
+        Remove a sortfield
+
+        Args:
+            field_name (str): Name of field to be removed.
+        """
+        if field_name in self.__sort_fields:
+            del self.__sort_fields[field_name]
+
+    def clear_sort_rules(self):
+        """
+        Remove any rules set by :py:member:`add_sort_rule`
+        """
+        self.__sort_fields.clear()
