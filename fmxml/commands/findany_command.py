@@ -1,9 +1,9 @@
 # -*- mode: python tab-width: 4 coding: utf-8 -*-
-from .mixins import RelatedsSetMixin
+from .mixins import RelatedsSetsMixin
 from .base_command import BaseCommand
 
 
-class FindAnyCommand(RelatedsSetMixin, BaseCommand):
+class FindAnyCommand(RelatedsSetsMixin, BaseCommand):
     """
     –findany (Find random record) query commands
     """

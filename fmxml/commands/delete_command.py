@@ -1,9 +1,9 @@
 # -*- mode: python tab-width: 4 coding: utf-8 -*-
 from .base_command import BaseCommand
-from .mixins import RecordIdMixin, ScriptMixin
+from .mixins import RecordIdMixin, ScriptsMixin
 
 
-class DeleteCommand(RecordIdMixin, ScriptMixin, BaseCommand):
+class DeleteCommand(RecordIdMixin, ScriptsMixin, BaseCommand):
     """
     –delete (Delete record) query command
     """

@@ -2,9 +2,9 @@
 from collections import namedtuple, OrderedDict
 
 from .base_command import BaseCommand
-from .mixins import RecordIdMixin, FoundSetMixin, SortRuleMixin,\
-    ScriptMixin, PreFindScriptMixin,\
-    PreSortScriptMixin, RelatedsSetMixin
+from .mixins import RecordIdMixin, FoundSetMixin, SortRulesMixin,\
+    ScriptsMixin, PreFindScriptsMixin,\
+    PreSortScriptsMixin, RelatedsSetsMixin
 from ..fms import FMS_FIND_AND, FMS_FIND_OR
 from ..fms import \
     FMS_FIND_OP_EQ, FMS_FIND_OP_NEQ, \
@@ -17,13 +17,13 @@ from ..fms import FMS_SORT_DESCEND, FMS_SORT_ASCEND
 FindCriteria = namedtuple('FindCriteria', 'field_name test_value op')
 
 
-class FindCommand(SortRuleMixin,
+class FindCommand(SortRulesMixin,
                   RecordIdMixin,
                   FoundSetMixin,
-                  ScriptMixin,
-                  PreFindScriptMixin,
-                  PreSortScriptMixin,
-                  RelatedsSetMixin,
+                  ScriptsMixin,
+                  PreFindScriptsMixin,
+                  PreSortScriptsMixin,
+                  RelatedsSetsMixin,
                   BaseCommand):
     """
     –find or –findall (Find records) query commands

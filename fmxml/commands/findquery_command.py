@@ -2,8 +2,8 @@
 from collections import namedtuple, OrderedDict
 
 from .base_command import BaseCommand
-from .mixins import SortRuleMixin, FoundSetMixin, \
-    ScriptMixin, PreFindScriptMixin, PreSortScriptMixin
+from .mixins import SortRulesMixin, FoundSetMixin, \
+    ScriptsMixin, PreFindScriptsMixin, PreSortScriptsMixin
 
 FindQuery = namedtuple('FindQuery', 'field_name test_value')
 
@@ -19,10 +19,10 @@ class FindRequestDefinition:
 
 
 class FindQueryCommand(FoundSetMixin,
-                       SortRuleMixin,
-                       ScriptMixin,
-                       PreFindScriptMixin,
-                       PreSortScriptMixin,
+                       SortRulesMixin,
+                       ScriptsMixin,
+                       PreFindScriptsMixin,
+                       PreSortScriptsMixin,
                        BaseCommand):
     __slots__ = ['__request_definitions']
 
