@@ -11,7 +11,7 @@ class EditCommand(RecordIdMixin, BaseCommand):
     """
     -edit (Edit record) query command
     """
-    __slots__ = ['__mod_id', '__fqfn_list', '__delete_related', ]
+    __slots__ = ('__mod_id', '__fqfn_list', '__delete_related',)
 
     def __init__(self, fms, layout_name, record_id):
         super().__init__(fms, layout_name)
@@ -41,7 +41,7 @@ class EditCommand(RecordIdMixin, BaseCommand):
             command_params[field.fqfn] = field.value
 
         command_params['-edit'] = None
-        return self.urlencode_query(command_params)
+        return command_params.as_query()
 
     @property
     def mod_id(self):

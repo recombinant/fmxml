@@ -1,6 +1,9 @@
 # -*- mode: python tab-width: 4 coding: utf-8 -*-
+import urllib.parse
 from _operator import attrgetter
 from collections import namedtuple, Counter
+
+SAFE_CHARS = '*!():;,/ '
 
 Command = namedtuple('Command', 'cmd arg')
 Command.__new__.__defaults__ = (None,)
@@ -91,3 +94,37 @@ class CommandContainer:
     def has_cmd(self, cmd):
         assert isinstance(cmd, str)
         return any(command.cmd == cmd for command in self.__data)
+
+    def as_query(self):
+        """
+        Returns:
+            str: Suitable for the parameter section of a FileMaker url query.
+        """
+        start, end = [], []
+        # URL encode the query, but don't put =arg on the trailing "command"
+        for cmd, arg in self.__data:
+            assert isinstance(cmd, str)
+            assert isinstance(arg, (str, int, type(None)))
+            if arg is not None:
+                start.append((cmd, arg))  # cmd=arg
+            else:
+                end.append(cmd)  # cmd
+
+        if start:
+            # Command parameters - not HTML so safe= can be extended.
+            start = urllib.parse.urlencode(start, safe=SAFE_CHARS, encoding='utf-8',
+                                           quote_via=urllib.parse.quote)
+
+        if end:
+            # command verb, there should only be one
+            assert len(end) == 1
+            # ASCII - therefore no encoding needed
+            end = end[-1]
+
+        if start and end:
+            return '&'.join([start, end])
+
+        if end:
+            return end
+
+        raise AssertionError('Invalid command parameter sequence')  # pragma: no cover

@@ -7,7 +7,7 @@ class DeleteCommand(RecordIdMixin, ScriptsMixin, BaseCommand):
     """
     –delete (Delete record) query command
     """
-    __slots__ = []
+    __slots__ = ()
 
     def __init__(self, fms, layout_name, record_id):
         super().__init__(fms, layout_name)
@@ -21,4 +21,4 @@ class DeleteCommand(RecordIdMixin, ScriptsMixin, BaseCommand):
         command_params = super().get_command_params()
 
         command_params['-delete'] = None
-        return self.urlencode_query(command_params)
+        return command_params.as_query()

@@ -11,3 +11,6 @@ from .fms import FMS_RELATEDSETS_FILTER_LAYOUT, FMS_RELATEDSETS_FILTER_NONE
 
 
 from .fms import FileMakerServer
+from .commands.findquery_command import \
+    FindRequestDefinition, \
+    FindQuery

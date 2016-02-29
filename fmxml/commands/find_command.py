@@ -30,9 +30,9 @@ class FindCommand(SortRulesMixin,
 
     Automatically selects *-find* or *-findall* as appropriate.
     """
-    __slots__ = ['__logical_operator',
+    __slots__ = ('__logical_operator',
                  '__lay_response',
-                 '__find_criteria', ]
+                 '__find_criteria',)
 
     def __init__(self, fms, layout_name):
         super().__init__(fms, layout_name)
@@ -67,7 +67,7 @@ class FindCommand(SortRulesMixin,
         else:
             command_params['-find'] = None
 
-        return self.urlencode_query(command_params)
+        return command_params.as_query()
 
     @property
     def logical_operator(self):

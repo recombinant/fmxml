@@ -1,0 +1,40 @@
+<?xml version ="1.0" encoding="UTF-8" standalone="no" ?><!DOCTYPE fmresultset PUBLIC
+        "-//FMI//DTD fmresultset//EN" "http://n423.fmphost.com/fmi/xml/fmresultset.dtd">
+<fmresultset xmlns="http://www.filemaker.com/xml/fmresultset" version="1.0">
+    <error code="0"></error>
+    <product build="11/02/2015" name="FileMaker Web Publishing Engine"
+             version="14.0.4.412"></product>
+    <datasource database="FMPHP_Sample" date-format="MM/dd/yyyy" layout="Form View"
+                table="ENGLISH_NATURE" time-format="HH:mm:ss" timestamp-format="MM/dd/yyyy HH:mm:ss"
+                total-count="12"></datasource>
+    <metadata>
+        <field-definition auto-enter="no" four-digit-year="no" global="no" max-repeat="1"
+                          name="Title" not-empty="no" numeric-only="no" result="text"
+                          time-of-day="no" type="normal"></field-definition>
+        <field-definition auto-enter="no" four-digit-year="no" global="no" max-repeat="1"
+                          name="Status" not-empty="no" numeric-only="no" result="text"
+                          time-of-day="no" type="normal"></field-definition>
+        <field-definition auto-enter="no" four-digit-year="no" global="no" max-repeat="4"
+                          name="Author" not-empty="no" numeric-only="no" result="text"
+                          time-of-day="no" type="normal"></field-definition>
+        <field-definition auto-enter="no" four-digit-year="no" global="no" max-repeat="1"
+                          name="Publisher" not-empty="no" numeric-only="no" result="text"
+                          time-of-day="no" type="normal"></field-definition>
+        <field-definition auto-enter="no" four-digit-year="no" global="no" max-repeat="1"
+                          name="Cover Photo Credit" not-empty="no" numeric-only="no" result="text"
+                          time-of-day="no" type="normal"></field-definition>
+        <field-definition auto-enter="no" four-digit-year="no" global="no" max-repeat="1"
+                          name="Description" not-empty="no" numeric-only="no" result="text"
+                          time-of-day="no" type="normal"></field-definition>
+        <field-definition auto-enter="no" four-digit-year="no" global="no" max-repeat="1"
+                          name="Quantity in Stock" not-empty="no" numeric-only="no" result="number"
+                          time-of-day="no" type="normal"></field-definition>
+        <field-definition auto-enter="no" four-digit-year="no" global="no" max-repeat="1"
+                          name="Number of Pages" not-empty="no" numeric-only="no" result="number"
+                          time-of-day="no" type="normal"></field-definition>
+        <field-definition auto-enter="no" four-digit-year="no" global="no" max-repeat="1"
+                          name="Cover Image" not-empty="no" numeric-only="no" result="container"
+                          time-of-day="no" type="normal"></field-definition>
+    </metadata>
+    <resultset count="0" fetch-size="0"></resultset>
+</fmresultset>

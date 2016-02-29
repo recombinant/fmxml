@@ -298,6 +298,7 @@ def test_07_edit_command(fms, layout_name):
                     '-relatedsets.filter=none&' \
                     '-findany'
 
+
 # These queries are from the Custom Web Publishing guide.
 # https://fmhelp.filemaker.com/docs/14/en/fms14_cwp_guide.pdf
 #
@@ -706,6 +707,7 @@ def test_cwp_05():
     query1 = FindQuery('typeofanimal', 'Cat')
     query2 = FindQuery('color', 'Gray')
     query3 = FindQuery('name', 'Fluffy')
+
     request_definition1 = FindRequestDefinition([query1, query2, ])
     request_definition2 = FindRequestDefinition([query3, ], omit=True)
 
@@ -728,7 +730,8 @@ def test_cwp_06():
     request_definition2 = FindRequestDefinition([query2, ])
     request_definition3 = FindRequestDefinition([query3, ], omit=True)
 
-    find_query_command.add_request_definitions(request_definition1, request_definition2, request_definition3)
+    find_query_command.add_request_definitions(request_definition1, request_definition2,
+                                               request_definition3)
 
     query = find_query_command.get_query()
 

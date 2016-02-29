@@ -24,7 +24,7 @@ class FindQueryCommand(FoundSetMixin,
                        PreFindScriptsMixin,
                        PreSortScriptsMixin,
                        BaseCommand):
-    __slots__ = ['__request_definitions']
+    __slots__ = ('__request_definitions',)
 
     def __init__(self, fms, layout_name):
         super().__init__(fms, layout_name)
@@ -44,7 +44,7 @@ class FindQueryCommand(FoundSetMixin,
 
     def get_query(self):
         """
-        This is part of the fms command. Nothing to do with the FindQuery's query.
+        Returns the URL query. Nothing to do with the FindQuery's query logic.
         """
         assert self.__request_definitions
         command_params = super().get_command_params()
@@ -81,4 +81,4 @@ class FindQueryCommand(FoundSetMixin,
             command_params[k] = v
 
         command_params['-findquery'] = None
-        return self.urlencode_query(command_params)
+        return command_params.as_query()
