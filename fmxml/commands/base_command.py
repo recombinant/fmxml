@@ -1,7 +1,7 @@
 # -*- mode: python tab-width: 4 coding: utf-8 -*-
 from .command_container import CommandContainer, Command
-from ..parsers.data_grammar import DataGrammarParser
-from ..structure.command_result import CommandResult
+from ..parsers import DataGrammarParser
+from ..structure import CommandResult
 
 
 class BaseCommand:
@@ -29,7 +29,8 @@ class BaseCommand:
         return command_params
 
     def execute(self):
-        xml_bytes = self.__fms._execute(self.get_query())
+        query = self.get_query()
+        xml_bytes = self.__fms._execute(query)
         assert xml_bytes
 
         parsed_data = DataGrammarParser().parse(xml_bytes)

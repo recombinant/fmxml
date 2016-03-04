@@ -7,11 +7,11 @@ from .grammar_base import GrammarParserBase
 from .grammar_base import RawProduct
 from .grammar_base import elem_to_namedtuple
 
-RawFMPXMLLayout = namedtuple('RawFMPXMLLayout', 'errorcode product layout valuelists')
-RawLayout = namedtuple('RawLayout', 'database name fields')
+RawFMPXMLLayout = namedtuple('RawFMPXMLLayout', 'errorcode product layout raw_valuelists')
+RawLayout = namedtuple('RawLayout', 'database name raw_fields')
 RawField = namedtuple('RawField', 'name style')
-RawStyle = namedtuple('RawStyle', 'type_ valuelist')
-RawValuelist = namedtuple('RawValuelist', 'name values')
+RawStyle = namedtuple('RawStyle', 'type_ valuelist_name')
+RawValuelist = namedtuple('RawValuelist', 'name raw_values')
 RawValue = namedtuple('RawValue', 'display text')
 
 
@@ -61,7 +61,7 @@ class InfoGrammarParser(GrammarParserBase):
                     fmpxmllayout = RawFMPXMLLayout(errorcode=None,
                                                    product=None,
                                                    layout=[],
-                                                   valuelists=[])
+                                                   raw_valuelists=[])
                 elif event == 'end':
                     return fmpxmllayout
 
@@ -79,7 +79,7 @@ class InfoGrammarParser(GrammarParserBase):
                 if event == 'start':
                     database = elem.get('DATABASE')
                     name = elem.get('NAME')
-                    layout = RawLayout(database=database, name=name, fields=[])
+                    layout = RawLayout(database=database, name=name, raw_fields=[])
                     fmpxmllayout = fmpxmllayout._replace(layout=layout)
                     del database, name, layout
 
@@ -87,43 +87,43 @@ class InfoGrammarParser(GrammarParserBase):
                 if event == 'start':
                     name = elem.get('NAME')
                     style = None
-                    field = RawField(name=name, style=style)
-                    fmpxmllayout.layout.fields.append(field)
-                    del name, style, field
+                    raw_field = RawField(name=name, style=style)
+                    fmpxmllayout.layout.raw_fields.append(raw_field)
+                    del name, style, raw_field
 
             elif elem.tag == 'STYLE':
                 if event == 'start':
                     # TYPE will be one of these:
                     # POPUPLIST|POPUPMENU|CHECKBOX|RADIOBUTTONS|SCROLLTEXT|SELECTIONLIST|EDITTEXT|CALENDAR
                     type_ = elem.get('TYPE')
-                    valuelist = elem.get('VALUELIST')
-                    style = RawStyle(type_=type_, valuelist=valuelist)
-                    assert fmpxmllayout.layout.fields[-1].style is None
-                    field = fmpxmllayout.layout.fields[-1]
-                    field = field._replace(style=style)
-                    fmpxmllayout.layout.fields[-1] = field
-                    del type_, valuelist, style
+                    valuelist_name = elem.get('VALUELIST')
+                    style = RawStyle(type_=type_, valuelist_name=valuelist_name)
+                    assert fmpxmllayout.layout.raw_fields[-1].style is None
+                    raw_field = fmpxmllayout.layout.raw_fields[-1]
+                    raw_field = raw_field._replace(style=style)
+                    fmpxmllayout.layout.raw_fields[-1] = raw_field
+                    del type_, valuelist_name, style, raw_field
 
             elif elem.tag == 'VALUELISTS':
                 if event == 'start':
-                    assert isinstance(fmpxmllayout.valuelists, list)
-                    assert not fmpxmllayout.valuelists
+                    assert isinstance(fmpxmllayout.raw_valuelists, list)
+                    assert not fmpxmllayout.raw_valuelists
 
             elif elem.tag == 'VALUELIST':
                 if event == 'start':
                     name = elem.get('NAME')
-                    valuelist = RawValuelist(name=name, values=[])
-                    fmpxmllayout.valuelists.append(valuelist)
-                    del name, valuelist
+                    raw_valuelist = RawValuelist(name=name, raw_values=[])
+                    fmpxmllayout.raw_valuelists.append(raw_valuelist)
+                    del name, raw_valuelist
 
             elif elem.tag == 'VALUE':
                 if event == 'start':
                     # append the value to the last valuelist's values list
                     display = elem.get('DISPLAY')
                     text = elem.text
-                    value = RawValue(display=display, text=text)
-                    fmpxmllayout.valuelists[-1].values.append(value)
-                    del display, text, value
+                    raw_value = RawValue(display=display, text=text)
+                    fmpxmllayout.raw_valuelists[-1].raw_values.append(raw_value)
+                    del display, text, raw_value
 
             else:  # pragma: no cover
                 raise AssertionError(event, elem.tag)

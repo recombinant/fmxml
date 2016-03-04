@@ -49,10 +49,12 @@ class RawResultSet(ElemInitialiser):
 
 
 class RawRecord(ElemInitialiser):
-    __slots__ = ['record_id', 'mod_id', 'fields', 'relatedsets']
+    __slots__ = ['record_id', 'modification_id', 'fields', 'relatedsets']
 
     def __init__(self, elem):
         super().__init__(elem)
+        self.modification_id = self.mod_id
+        del self.mod_id
         self.fields = []
         self.relatedsets = {}
 

@@ -12,18 +12,20 @@ from fmxml import \
     FMS_FIND_OP_BW, FMS_FIND_OP_EW
 from fmxml import FMS_SORT_ASCEND, FMS_SORT_DESCEND
 from fmxml import FileMakerServer
-from fmxml.commands.delete_command import DeleteCommand
-from fmxml.commands.dup_command import DupCommand
-from fmxml.commands.edit_command import EditCommand
-from fmxml.commands.find_command import FindCommand
-from fmxml.commands.findany_command import FindAnyCommand
-from fmxml.commands.findquery_command import FindQueryCommand, FindQuery, FindRequestDefinition
-from fmxml.commands.new_command import NewCommand
+from fmxml.commands import DeleteCommand
+from fmxml.commands import DupCommand
+from fmxml.commands import EditCommand
+from fmxml.commands import FindCommand
+from fmxml.commands import FindAnyCommand
+from fmxml.commands import FindQueryCommand, FindQuery, FindRequestDefinition
+from fmxml.commands import NewCommand
 from fmxml.fms import FMS_RELATEDSETS_FILTER_LAYOUT, FMS_RELATEDSETS_FILTER_NONE
 
 
 @pytest.fixture(scope='module')
 def fms():
+    # No actual connection is required as only the query strings are being
+    # tested - so no requests need to be made to the server.
     fms_ = FileMakerServer(log_level=logging.DEBUG)
     fms_.set_property('db', 'FMPHP_Sample')
     return fms_
@@ -256,11 +258,11 @@ def test_05_find_command_find_criteria(fms, layout_name):
 
 def test_07_edit_command(fms, layout_name):
     edit_command = EditCommand(fms, layout_name, record_id=12)
-    assert edit_command.mod_id is None
-    edit_command.set_mod_id(2)
-    assert edit_command.mod_id == 2
-    edit_command.set_mod_id(3)
-    assert edit_command.mod_id == 3
+    assert edit_command.modification_id is None
+    edit_command.set_modification_id(2)
+    assert edit_command.modification_id == 2
+    edit_command.set_modification_id(3)
+    assert edit_command.modification_id == 3
     edit_command.add_edit_fqfn('Title', 'Unknown 24/7')
     query = edit_command.get_query()
     assert query == '-db=FMPHP_Sample&' \
@@ -393,7 +395,7 @@ def test_cwp_01():
                     '-delete'
 
     edit_command = EditCommand(fms_, 'departments', record_id=22)
-    edit_command.set_mod_id(6)
+    edit_command.set_modification_id(6)
     edit_command.add_edit_fqfn('last_name', 'Jones')
     query = edit_command.get_query()
     assert query == '-db=employees&' \

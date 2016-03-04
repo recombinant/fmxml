@@ -5,9 +5,9 @@ import os
 import re
 from pathlib import Path
 
-from fmxml.parsers.data_grammar import DataGrammarParser
-from fmxml.parsers.data_grammar2 import DataGrammar2Parser
-from fmxml.parsers.info_grammar import InfoGrammarParser
+from fmxml.parsers import DataGrammarParser
+from fmxml.parsers import DataGrammar2Parser
+from fmxml.parsers import InfoGrammarParser
 
 __author__ = "recombinant"
 __copyright__ = "recombinant"
@@ -48,7 +48,7 @@ def test_data_grammar_layout():
 
 
 def test_info_grammar():
-    path = Path(__file__).parent / 'data' / 'FMPXMLLAYOUT-db=FMPHP_Sample&-lay=Form+View&-view.xml'
+    path = Path(__file__).parent / 'data' / 'FMPXMLLAYOUT-db=FMPHP_Sample&-lay=Form View&-view.xml'
     _get_info_grammar_from_file(path)
 
 

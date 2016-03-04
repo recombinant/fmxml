@@ -19,7 +19,7 @@ from fmxml import FindQuery, FindRequestDefinition
 from fmxml.commands.command_container import SAFE_CHARS
 from fmxml.fms import FileMakerServer, FMS_SORT_ASCEND, FMS_FIND_OP_EW, FMS_FIND_OP_BW, \
     FMS_FIND_OP_CN, FMS_FIND_OP_EQ, FMS_FIND_OP_NEQ, FMS_SORT_DESCEND, FMS_FIND_OR
-from fmxml.structure.record import Record
+from fmxml.structure import Record
 from tests import secret
 
 
@@ -90,10 +90,9 @@ def _execute(self, query, xml_grammar='fmresultset'):
 
 @pytest.fixture()
 def fms_cached():
-    connection = secret.get_connection('connection1')
+    connection = secret.get_connection('fmphp_sample')
     setattr(FileMakerServer, '_execute', _execute)  # Monkey patch.
     fms_ = FileMakerServer(log_level=logging.INFO, **connection)
-    fms_.set_property('db', 'FMPHP_Sample')
     return fms_
 
 
@@ -137,11 +136,11 @@ def test_03_script_names(fms_cached):
 def test_04_records(fms_cached, layout_name):
     # Get all the records, there should not be many.
 
-    find_command = fms_cached.find_records_command(layout_name)
+    find_command = fms_cached.create_find_records_command(layout_name)
     command_result = find_command.execute()
     records = command_result.records
     assert len(command_result.records), command_result.fetch_size
-    assert len(command_result.records), command_result.table_record_count
+    assert len(command_result.records), command_result.total_count
 
     assert isinstance(records, list)
     assert len(records)
@@ -180,9 +179,9 @@ def test_05_layout(fms_cached, layout_name):
     assert layout.name == layout_name
 
 
-def test09_sort1(fms_cached, layout_name):
+def test_09_sort1(fms_cached, layout_name):
     # sort by title
-    find_command = fms_cached.find_records_command(layout_name)
+    find_command = fms_cached.create_find_records_command(layout_name)
     find_command.add_sort_rule('Title', 1, FMS_SORT_ASCEND)
     command_result = find_command.execute()
     records = command_result.records
@@ -215,8 +214,8 @@ def test09_sort1(fms_cached, layout_name):
                 records2[idx].get_field_value(field_name)
 
 
-def test10_findquery(fms_cached, layout_name):
-    findquery_command = fms_cached.findquery_command(layout_name)
+def test_10_findquery(fms_cached, layout_name):
+    findquery_command = fms_cached.create_findquery_command(layout_name)
 
     # Specify search criterion for first find request
     query1 = FindQuery('Quantity in Stock', '<100')
@@ -249,7 +248,7 @@ def test10_findquery(fms_cached, layout_name):
 
 
 def test_11_find(fms_cached, layout_name):
-    find_command = fms_cached.find_records_command(layout_name)
+    find_command = fms_cached.create_find_records_command(layout_name)
     find_command.add_find_criterion('Title', 'Pennsylvania 24/7')
     command_result = find_command.execute()
     assert command_result.fetch_size == 1
@@ -272,7 +271,7 @@ def test_11_find(fms_cached, layout_name):
     assert len(record_id_set) == 2
 
     # Repeat last search in one step.
-    find_command = fms_cached.find_records_command(layout_name)
+    find_command = fms_cached.create_find_records_command(layout_name)
     find_command.add_find_criterion('Title', 'Pennsylvania 24/7')
     find_command.add_find_criterion('Title', 'New York 24/7')
     find_command.set_logical_operator(FMS_FIND_OR)
@@ -283,83 +282,85 @@ def test_11_find(fms_cached, layout_name):
     assert record_id_set == {record.record_id for record in command_result.records}
 
 
-def test12_findany(fms_cached, layout_name):
-    command = fms_cached.findany_record_command(layout_name)
+def test_12_findany(fms_cached, layout_name):
+    command = fms_cached.create_findany_record_command(layout_name)
     command_result = command.execute()
 
     assert len(command_result.records) == 1
     assert command_result.fetch_size == 1
 
 
-def test13_find_op_neq(fms_cached, layout_name):
-    command = fms_cached.find_records_command(layout_name)
+def test_13_find_op_neq(fms_cached, layout_name):
+    command = fms_cached.create_find_records_command(layout_name)
     command.add_find_criterion('Title', 'New York 24/7', op=FMS_FIND_OP_NEQ)
     command_result = command.execute()
 
-    assert command_result.count == 11
+    assert command_result.total_count == 12
+    assert command_result.found_count == 11
+    assert command_result.fetch_size == 11
     record_id_set = {record.record_id for record in command_result.records}
     assert len(record_id_set) == 11
 
     # # alternatively...
-    # command = fms_cached.find_records_command(layout_name)
+    # command = fms_cached.create_find_records_command(layout_name)
     # command.add_find_criterion('Title', 'omit,New York 24/7')
     # command_result = command.execute()
     # assert record_id_set == {record.record_id for record in command_result.records}
 
 
-def test14_find_op_eq(fms_cached, layout_name):
-    command = fms_cached.find_records_command(layout_name)
+def test_14_find_op_eq(fms_cached, layout_name):
+    command = fms_cached.create_find_records_command(layout_name)
     command.add_find_criterion('Title', 'New York 24/7', op=FMS_FIND_OP_EQ)
     command_result = command.execute()
 
-    assert command_result.count == 1
+    assert command_result.found_count == 1
     assert command_result.fetch_size == 1
     record_id_set = {record.record_id for record in command_result.records}
     assert len(record_id_set) == 1
 
     # alternatively...
-    command = fms_cached.find_records_command(layout_name)
+    command = fms_cached.create_find_records_command(layout_name)
     command.add_find_criterion('Title', '=New York 24/7')
     command_result = command.execute()
     assert record_id_set == {record.record_id for record in command_result.records}
 
 
-def test15_find_op_cn(fms_cached, layout_name):
-    command = fms_cached.find_records_command(layout_name)
+def test_15_find_op_cn(fms_cached, layout_name):
+    command = fms_cached.create_find_records_command(layout_name)
     # Test contains 'as'
     command.add_find_criterion('Title', 'as', op=FMS_FIND_OP_CN)
     command_result = command.execute()
 
-    assert command_result.count == 3
+    assert command_result.found_count == 3
     assert command_result.fetch_size == 3
     record_id_set = {record.record_id for record in command_result.records}
     assert len(record_id_set) == 3
 
     # alternatively...
-    command = fms_cached.find_records_command(layout_name)
+    command = fms_cached.create_find_records_command(layout_name)
     # Test contains 'as'
     command.add_find_criterion('Title', '*as*')
     command_result = command.execute()
     assert record_id_set == {record.record_id for record in command_result.records}
 
 
-def test16_find_op_cn(fms_cached, layout_name):
-    command = fms_cached.find_records_command(layout_name)
+def test_16_find_op_cn(fms_cached, layout_name):
+    command = fms_cached.create_find_records_command(layout_name)
     # Test begins with 'bw'
     command.add_find_criterion('Title', 'C', op=FMS_FIND_OP_BW)
     command_result = command.execute()
 
-    assert command_result.count == 2
+    assert command_result.found_count == 2
     assert command_result.fetch_size == 2
 
 
-def test17_find_op_ew(fms_cached, layout_name):
-    command = fms_cached.find_records_command(layout_name)
+def test_17_find_op_ew(fms_cached, layout_name):
+    command = fms_cached.create_find_records_command(layout_name)
     # Test ends with 'ew'
     command.add_find_criterion('Title', 'a 24/7', op=FMS_FIND_OP_EW)
     command_result = command.execute()
 
-    assert command_result.count == 6
+    assert command_result.found_count == 6
     assert command_result.fetch_size == 6
     expected = {'Alaska 24/7', 'America 24/7', 'Arizona 24/7',
                 'California 24/7', 'Florida 24/7', 'Pennsylvania 24/7', }
@@ -368,7 +369,7 @@ def test17_find_op_ew(fms_cached, layout_name):
     record_id_set = {record.record_id for record in command_result.records}
     assert len(record_id_set) == 6
 
-    command = fms_cached.find_records_command(layout_name)
+    command = fms_cached.create_find_records_command(layout_name)
     command.add_find_criterion('Title', '*a 24/7')
     command_result = command.execute()
     found = {record.get_field_value('Title') for record in command_result.records}
@@ -376,13 +377,13 @@ def test17_find_op_ew(fms_cached, layout_name):
     assert record_id_set == {record.record_id for record in command_result.records}
 
 
-def test18_skip(fms_cached, layout_name):
-    command = fms_cached.find_records_command(layout_name)
+def test_18_skip(fms_cached, layout_name):
+    command = fms_cached.create_find_records_command(layout_name)
     command.add_sort_rule('Title', 1, FMS_SORT_ASCEND)
     command.set_skip(skip=5)
     command_result = command.execute()
 
-    assert command_result.count == 12
+    assert command_result.found_count == 12
     assert command_result.fetch_size == 7
     assert len(command_result.records) == 7
 
@@ -393,13 +394,14 @@ def test18_skip(fms_cached, layout_name):
     assert expected == found
 
 
-def test19_max(fms_cached, layout_name):
-    command = fms_cached.find_records_command(layout_name)
+def test_19_max(fms_cached, layout_name):
+    command = fms_cached.create_find_records_command(layout_name)
     command.add_sort_rule('Title', 1, FMS_SORT_ASCEND)
     command.set_max(max_=3)
     command_result = command.execute()
 
-    assert command_result.count == 12
+    assert command_result.total_count == 12
+    assert command_result.found_count == 12
     assert command_result.fetch_size == 3
     assert len(command_result.records) == 3
 
@@ -408,14 +410,15 @@ def test19_max(fms_cached, layout_name):
     assert expected == found
 
 
-def test20_skip_max(fms_cached, layout_name):
-    command = fms_cached.find_records_command(layout_name)
+def test_20_skip_max(fms_cached, layout_name):
+    command = fms_cached.create_find_records_command(layout_name)
     command.add_sort_rule('Title', 1, FMS_SORT_ASCEND)
     command.set_skip(skip=5)
     command.set_max(max_=4)
     command_result = command.execute()
 
-    assert command_result.count == 12
+    assert command_result.total_count == 12
+    assert command_result.found_count == 12
     assert command_result.fetch_size == 4
     assert len(command_result.records) == 4
 
@@ -425,10 +428,11 @@ def test20_skip_max(fms_cached, layout_name):
     assert expected == found
 
 
-def test21_findall(fms_cached, layout_name):
-    command = fms_cached.find_records_command(layout_name)
-    command_result = command.execute()
+def test_21_findall(fms_cached, layout_name):
+    findall_command = fms_cached.create_find_records_command(layout_name)
+    command_result = findall_command.execute()
 
     assert len(command_result.records) == 12
-
-# fms_cached = FileMakerServer()
+    assert command_result.total_count == 12
+    assert command_result.fetch_size == 12
+    assert command_result.found_count == 12

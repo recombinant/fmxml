@@ -6,8 +6,6 @@ from urllib.parse import urlsplit, SplitResult, urlunsplit
 
 import requests
 
-from fmxml.parsers.data_grammar import DataGrammarParser
-
 FMS_FIND_AND = 'and'
 FMS_FIND_OR = 'or'
 
@@ -39,6 +37,7 @@ class FileMakerServer:
                  hostspec='http://localhost',
                  username='user',
                  password='password',
+                 db=None,
                  log_level=logging.WARNING):
         logging.basicConfig(level=log_level)
         self.__log = logging.getLogger('FileMakerServer')
@@ -46,6 +45,9 @@ class FileMakerServer:
         self.__prop_lookup = {}
         self.__layout_names = {}
         self.__requests_session = None
+
+        if db is not None:
+            self.set_property('db', db)
 
         self.set_property('hostspec', hostspec)
         self.set_property('username', username)
@@ -79,7 +81,7 @@ class FileMakerServer:
         assert isinstance(record_id, int)
         assert record_id > 0
 
-        command_object = self.find_records_command(layout_name)
+        command_object = self.create_find_records_command(layout_name)
         command_object.set_record_id(record_id)
         command_result = command_object.execute()
 
@@ -90,21 +92,39 @@ class FileMakerServer:
             self.__log.info('Record "{}" not found in layout "{}".'.format(record_id, layout_name))
             return None
 
-    def find_records_command(self, layout_name):
-        from .commands.find_command import FindCommand
+    def create_dup_record_command(self, layout_name, record_id=None):
+        from .commands import DupCommand
+        return DupCommand(self, layout_name, record_id)
+
+    def create_delete_record_command(self, layout_name, record_id=None):
+        from .commands import DeleteCommand
+        return DeleteCommand(self, layout_name, record_id)
+
+    def create_edit_record_command(self, layout_name, record_id=None, modification_id=None):
+        from fmxml.commands import EditCommand
+        return EditCommand(self, layout_name, record_id, modification_id)
+
+    def create_find_records_command(self, layout_name):
+        from .commands import FindCommand
         return FindCommand(self, layout_name)
 
-    def findany_record_command(self, layout_name):
-        from .commands.findany_command import FindAnyCommand
+    def create_findany_record_command(self, layout_name):
+        from .commands import FindAnyCommand
         return FindAnyCommand(self, layout_name)
 
-    def findquery_command(self, layout_name):
-        from .commands.findquery_command import FindQueryCommand
+    def create_findquery_command(self, layout_name):
+        from .commands import FindQueryCommand
         return FindQueryCommand(self, layout_name)
 
+    def create_new_record_command(self, layout_name):
+        from .commands import NewCommand
+        # TODO: field container.
+        return NewCommand(self, layout_name)
+
     def get_layout(self, layout_name):
-        from .structure.layout import Layout
-        from .commands.command_container import CommandContainer, Command
+        from .structure import Layout
+        from .commands import CommandContainer, Command
+        from .parsers import DataGrammarParser
 
         if layout_name in self.__layout_names:
             return self.__layout_names[layout_name]
@@ -137,17 +157,17 @@ class FileMakerServer:
 
     def __get_xx_names(self, xx):
         assert xx in {'-dbnames', '-layoutnames', '-scriptnames'}
-        from .commands.command_container import CommandContainer, Command
-        from .parsers.data_grammar import DataGrammarParser
+        from .commands import CommandContainer, Command
+        from .parsers import DataGrammarParser
 
         if xx == '-dbnames':
             commands = [
-                Command('-dbnames', None),
+                Command('-dbnames'),
             ]
         else:
             commands = [
                 Command('-db', self.get_property('db')),
-                Command(xx, None),
+                Command(xx),
             ]
         query = CommandContainer(*commands).as_query()
 
@@ -239,7 +259,10 @@ class FileMakerServer:
         # ----------------------------------------------------- reconstruct url
         sr1 = urlsplit(hostspec)
         sr2 = urlsplit(url_path)
-        sr = SplitResult(scheme=sr1.scheme, netloc=sr1.netloc, path=sr2.path, query=sr2.query,
+        sr = SplitResult(scheme=sr1.scheme,
+                         netloc=sr1.netloc,
+                         path=sr2.path,
+                         query=sr2.query,
                          fragment='')
         # Join together (correctly) for container_url.
         container_url = urlunsplit(sr)

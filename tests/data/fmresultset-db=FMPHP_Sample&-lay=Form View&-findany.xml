@@ -37,37 +37,37 @@
                           time-of-day="no" type="normal"></field-definition>
     </metadata>
     <resultset count="1" fetch-size="1">
-        <record mod-id="5" record-id="2">
+        <record mod-id="1" record-id="6">
             <field name="Title">
-                <data>America 24/7</data>
+                <data>Florida 24/7</data>
             </field>
             <field name="Status">
-                <data>Popular</data>
+                <data>Backordered</data>
             </field>
             <field name="Author">
-                <data></data>
                 <data>Rick Smolan and David Elliot Cohen</data>
+                <data></data>
             </field>
             <field name="Publisher">
                 <data>DK Publishing</data>
             </field>
             <field name="Cover Photo Credit">
-                <data>Dan White</data>
+                <data>Andrew Kaufman, Contact Press Images</data>
             </field>
             <field name="Description">
-                <data>The remarkable photographs showcased in America 24/7 are the result of an epic
+                <data>The remarkable photographs showcased in Florida 24/7 are the result of an epic
                     project, America 24/7, which harnessed the talents of more than 25,000
                     photographers.
                 </data>
             </field>
             <field name="Quantity in Stock">
-                <data>200</data>
+                <data>0</data>
             </field>
             <field name="Number of Pages">
-                <data>306</data>
+                <data>160</data>
             </field>
             <field name="Cover Image">
-                <data>/fmi/xml/cnt/cover-A247.jpg?-db=FMPHP_Sample&amp;-lay=Form%20View&amp;-recid=2&amp;-field=Cover%20Image(1)</data>
+                <data>/fmi/xml/cnt/FL-cover.jpg?-db=FMPHP_Sample&amp;-lay=Form%20View&amp;-recid=6&amp;-field=Cover%20Image(1)</data>
             </field>
         </record>
     </resultset>
