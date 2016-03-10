@@ -3,6 +3,8 @@ import urllib.parse
 from _operator import attrgetter
 from collections import namedtuple, Counter
 
+from decimal import Decimal
+
 SAFE_CHARS = '*!():;,/ '
 
 Command = namedtuple('Command', 'cmd arg')
@@ -104,7 +106,7 @@ class CommandContainer:
         # URL encode the query, but don't put =arg on the trailing "command"
         for cmd, arg in self.__data:
             assert isinstance(cmd, str)
-            assert isinstance(arg, (str, int, type(None)))
+            assert isinstance(arg, (str, int, Decimal, type(None)))
             if arg is not None:
                 start.append((cmd, arg))  # cmd=arg
             else:

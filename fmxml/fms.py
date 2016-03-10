@@ -31,7 +31,8 @@ FMS_RELATEDSETS_FILTER_NONE = 'none'
 
 
 class FileMakerServer:
-    __slots__ = ('__log', '__prop_lookup', '__requests_session', '__layout_names')
+    __slots__ = ('__log', '__prop_lookup', '__requests_session', '__layout_names',
+                 '__hostspec', '__db_name', '__username', '__password',)
 
     def __init__(self,
                  hostspec='http://localhost',
@@ -46,35 +47,42 @@ class FileMakerServer:
         self.__layout_names = {}
         self.__requests_session = None
 
-        if db is not None:
-            self.set_property('db', db)
-
-        self.set_property('hostspec', hostspec)
-        self.set_property('username', username)
-        self.set_property('password', password)
+        self.set_db_name(db or None)
+        self.set_hostspec(hostspec)
+        self.set_username(username)
+        self.set_password(password)
 
     @property
     def log(self):
         return self.__log
 
-    def set_property(self, prop_name, value):
-        """
-        Args:
-            prop_name (str): Name of the property to set.
-            value: Value of the property to set.
-        """
-        self.__prop_lookup[prop_name] = value
+    @property
+    def db_name(self):
+        return self.__db_name
 
-    def get_property(self, prop_name):
-        """
-        Args:
-            prop_name (str): Name of the property to get.
+    @property
+    def hostspec(self):
+        return self.__hostspec
 
-        Returns:
-            Value of property `prop_name` or `None` if it does
-            not exist.
-        """
-        return self.__prop_lookup.get(prop_name, None)
+    @property
+    def username(self):
+        return self.__username
+
+    @property
+    def password(self):
+        return self.__password
+
+    def set_db_name(self, db_name):
+        self.__db_name = db_name
+
+    def set_hostspec(self, hostspec):
+        self.__hostspec = hostspec
+
+    def set_username(self, username):
+        self.__username = username
+
+    def set_password(self, password):
+        self.__password = password
 
     def find_record_by_id(self, layout_name, record_id):
         assert isinstance(layout_name, str)
@@ -93,11 +101,11 @@ class FileMakerServer:
             return None
 
     def create_dup_record_command(self, layout_name, record_id=None):
-        from .commands import DupCommand
+        from fmxml.commands import DupCommand
         return DupCommand(self, layout_name, record_id)
 
     def create_delete_record_command(self, layout_name, record_id=None):
-        from .commands import DeleteCommand
+        from fmxml.commands import DeleteCommand
         return DeleteCommand(self, layout_name, record_id)
 
     def create_edit_record_command(self, layout_name, record_id=None, modification_id=None):
@@ -105,32 +113,32 @@ class FileMakerServer:
         return EditCommand(self, layout_name, record_id, modification_id)
 
     def create_find_records_command(self, layout_name):
-        from .commands import FindCommand
+        from fmxml.commands import FindCommand
         return FindCommand(self, layout_name)
 
     def create_findany_record_command(self, layout_name):
-        from .commands import FindAnyCommand
+        from fmxml.commands import FindAnyCommand
         return FindAnyCommand(self, layout_name)
 
     def create_findquery_command(self, layout_name):
-        from .commands import FindQueryCommand
+        from fmxml.commands import FindQueryCommand
         return FindQueryCommand(self, layout_name)
 
     def create_new_record_command(self, layout_name):
-        from .commands import NewCommand
+        from fmxml.commands import NewCommand
         # TODO: field container.
         return NewCommand(self, layout_name)
 
     def get_layout(self, layout_name):
-        from .structure import Layout
-        from .commands import CommandContainer, Command
-        from .parsers import DataGrammarParser
+        from fmxml.structure import Layout
+        from fmxml.commands import CommandContainer, Command
+        from fmxml.parsers import DataGrammarParser
 
         if layout_name in self.__layout_names:
             return self.__layout_names[layout_name]
 
         command_params = [
-            Command('-db', self.get_property('db')),
+            Command('-db', self.db_name),
             Command('-lay', layout_name),
             Command('-view'),
         ]
@@ -157,8 +165,8 @@ class FileMakerServer:
 
     def __get_xx_names(self, xx):
         assert xx in {'-dbnames', '-layoutnames', '-scriptnames'}
-        from .commands import CommandContainer, Command
-        from .parsers import DataGrammarParser
+        from fmxml.commands import CommandContainer, Command
+        from fmxml.parsers import DataGrammarParser
 
         if xx == '-dbnames':
             commands = [
@@ -166,7 +174,7 @@ class FileMakerServer:
             ]
         else:
             commands = [
-                Command('-db', self.get_property('db')),
+                Command('-db', self.db_name),
                 Command(xx),
             ]
         query = CommandContainer(*commands).as_query()
@@ -178,7 +186,9 @@ class FileMakerServer:
         parsed_data = parser.parse(xml_bytes)
 
         # Get the names directly from the parsed data.
-        return [record.fields[0].data[0] for record in parsed_data.resultset.records]
+        names = (record.fields[0].data[0] for record in parsed_data.resultset.records)
+        names = filter(bool, names)
+        return list(names)
 
     def _execute(self, query, xml_grammar='fmresultset'):
         """
@@ -195,7 +205,7 @@ class FileMakerServer:
         assert isinstance(xml_grammar, str)
 
         path = '/fmi/xml/{}.xml'.format(xml_grammar)
-        hostspec = self.get_property('hostspec')
+        hostspec = self.hostspec
 
         sr = urlsplit(hostspec)
         sr = SplitResult(scheme=sr.scheme, netloc=sr.netloc, path=path, query=query, fragment='')
@@ -224,38 +234,24 @@ class FileMakerServer:
         if self.__requests_session is None:
             self.__requests_session = requests.Session()
             # The username/password relates to this instance.
-            if self.get_property('username'):
+            if self.username:
                 self.__requests_session.auth = \
-                    (self.get_property('username'),
-                     self.get_property('password'))
+                    (self.username, self.password)
 
         return self.__requests_session
 
     def get_container_data_url(self, url_path):
         """
-        Returns the fully qualified URL for the specified container field.
-        Pass in a URL string that represents the file path for the container
-        field contents. For example, get the URL for a container field
-        named ``'Cover Image'``::
+            url = fms.get_container_data_url(record.get_field_value('Cover Image'))
 
-            url = fm.get_container_data_url(record.get_field_value('Cover Image'))
-
-        Args:
-          url_path (str): Path component of URL of the container field contents
-            to get. From the container record field value of the form
-            ``/path?query`` e.g.
-
-        ::
+            returns
 
             /fmi/xml/cnt/FL-cover.jpg?-db=FMPHP_Sample&-lay=Form%20View&-recid=6&-field=Cover%20Image(1)
-
-        Returns:
-          str: Fully qualified URL to container field contents
         """
         assert isinstance(url_path, str)
         assert url_path.lower().startswith('/fmi/xml/cnt')
 
-        hostspec = self.get_property('hostspec')
+        hostspec = self.hostspec
         # ----------------------------------------------------- reconstruct url
         sr1 = urlsplit(hostspec)
         sr2 = urlsplit(url_path)
@@ -278,7 +274,7 @@ class FileMakerServer:
         field contents. For example, get the image data from a container field
         named ``'Cover Image'``::
 
-            container_bytes = fm.get_container_data(record.get_field_value('Cover Image'))
+            container_bytes = fms.get_container_data(record.get_field_value('Cover Image'))
 
         In the above example the ``container_bytes`` will be a jpeg. This can be used
         in a web page by converting to base64 and embedding in the <IMG> tag::

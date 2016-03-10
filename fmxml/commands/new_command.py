@@ -1,5 +1,8 @@
 # -*- mode: python tab-width: 4 coding: utf-8 -*-
+import datetime
 from collections import namedtuple
+
+from decimal import Decimal
 
 from .base_command import BaseCommand
 
@@ -36,3 +39,14 @@ class NewCommand(BaseCommand):
             value: Value of the field.
         """
         self.__fqfn_list.append(NewField(fqfn, value))
+
+    def set_field_value(self, field_name, value, repetition=0):
+        assert isinstance(field_name, str)
+        assert isinstance(value, (int, str, Decimal, datetime.date)), type(value)
+        assert isinstance(repetition, int)
+
+        if isinstance(value, datetime.date):
+            value = value.strftime('%m/%d/%Y')
+
+        fqfn = '{}({})'.format(field_name, repetition)
+        self.add_new_fqfn(fqfn, value)

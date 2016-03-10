@@ -1,9 +1,10 @@
 # -*- mode: python tab-width: 4 coding: utf-8 -*-
-from collections import namedtuple, OrderedDict
+from collections import namedtuple
+from decimal import Decimal
 
 from .base_command import BaseCommand
-from .mixins import RecordIdMixin, FoundSetMixin, SortRulesMixin,\
-    ScriptsMixin, PreFindScriptsMixin,\
+from .mixins import RecordIdMixin, FoundSetMixin, SortRulesMixin, \
+    ScriptsMixin, PreFindScriptsMixin, \
     PreSortScriptsMixin, RelatedsSetsMixin
 from ..fms import FMS_FIND_AND, FMS_FIND_OR
 from ..fms import \
@@ -12,7 +13,6 @@ from ..fms import \
     FMS_FIND_OP_LT, FMS_FIND_OP_LTE, \
     FMS_FIND_OP_CN, \
     FMS_FIND_OP_BW, FMS_FIND_OP_EW
-from ..fms import FMS_SORT_DESCEND, FMS_SORT_ASCEND
 
 FindCriteria = namedtuple('FindCriteria', 'field_name test_value op')
 
@@ -103,6 +103,11 @@ class FindCommand(SortRulesMixin,
             test_value: Value to test against.
             op (str, optional):
         """
+        assert isinstance(field_name, str)
+        assert isinstance(test_value, (str, int, Decimal))
+        assert op in {None, FMS_FIND_OP_EQ, FMS_FIND_OP_NEQ, FMS_FIND_OP_GT, FMS_FIND_OP_GTE,
+                      FMS_FIND_OP_LT, FMS_FIND_OP_LTE, FMS_FIND_OP_CN, FMS_FIND_OP_BW,
+                      FMS_FIND_OP_EW, }
 
         self.__find_criteria.append(FindCriteria(field_name, test_value, op))
 

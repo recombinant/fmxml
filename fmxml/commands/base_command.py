@@ -10,7 +10,7 @@ class BaseCommand:
 
     This class must be on the right of any mixins so that it is at the end of
     the mro."""
-    __slots__ = ('__fms', '__layout_name', )
+    __slots__ = ('__fms', '__layout_name',)
 
     def __init__(self, fms, layout_name):
         assert fms
@@ -20,7 +20,7 @@ class BaseCommand:
         self.__layout_name = layout_name
 
     def get_command_params(self):
-        db = self.__fms.get_property('db')
+        db = self.__fms.db_name
         assert db
         command_params = CommandContainer(
             Command('-db', db),
