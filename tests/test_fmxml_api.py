@@ -15,32 +15,9 @@ from fmxml.structure import Record
 log = logging.getLogger('test_api')
 
 try:
-    from secret import get_connection
+    from tests.secret import get_connection
 except ImportError:
-    def get_connection(name):
-        return {
-            'fmphp_sample': {
-                'hostspec': 'http://localhost',
-                'username': 'user',
-                'password': 'password',
-                'db': 'FMPHP_Sample',
-            },
-            'connection2': {
-                'hostspec': 'http://localhost:80',
-                'username': 'user',
-                'password': 'password'
-            },
-            'connection3': {
-                'hostspec': 'https://localhost',
-                'username': 'user',
-                'password': 'password'
-            },
-            'connection4': {
-                'hostspec': 'https://localhost:443',
-                'username': 'user',
-                'password': 'password'
-            },
-        }[name]
+    from tests.dummy_secret import get_connection
 
 
 @pytest.fixture(scope='module')

@@ -63,7 +63,7 @@ def _execute(self, query, xml_grammar='fmresultset'):
     # -------------------------------------------------------------------------
     # The url.
     path = '/fmi/xml/{}.xml'.format(xml_grammar)
-    hostspec = self.get_property('hostspec')
+    hostspec = self.hostspec
 
     sr = urlsplit(hostspec)
     sr = SplitResult(scheme=sr.scheme, netloc=sr.netloc, path=path, query=query, fragment='')
@@ -171,11 +171,11 @@ def test_04_records(fms_cached, layout_name):
 
 def test_05_layout(fms_cached, layout_name):
     layout = fms_cached.get_layout(layout_name)
-    assert layout.database_name == fms_cached.get_property('db')
+    assert layout.database_name == fms_cached.db_name
     assert layout.name == layout_name
 
     layout = fms_cached.get_layout(layout_name)
-    assert layout.database_name == fms_cached.get_property('db')
+    assert layout.database_name == fms_cached.db_name
     assert layout.name == layout_name
 
 

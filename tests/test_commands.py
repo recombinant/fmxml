@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 # -*- mode: python tab-width: 4 coding: utf-8 -*-
+"""
+Just tests the commands and their generated URLs. Nothing goes out to the internet.
+"""
+
 import logging
 import urllib.parse
 
@@ -15,8 +19,8 @@ from fmxml import FileMakerServer
 from fmxml.commands import DeleteCommand
 from fmxml.commands import DupCommand
 from fmxml.commands import EditCommand
-from fmxml.commands import FindCommand
 from fmxml.commands import FindAnyCommand
+from fmxml.commands import FindCommand
 from fmxml.commands import FindQueryCommand, FindQuery, FindRequestDefinition
 from fmxml.commands import NewCommand
 from fmxml.fms import FMS_RELATEDSETS_FILTER_LAYOUT, FMS_RELATEDSETS_FILTER_NONE
@@ -27,7 +31,7 @@ def fms():
     # No actual connection is required as only the query strings are being
     # tested - so no requests need to be made to the server.
     fms_ = FileMakerServer(log_level=logging.DEBUG)
-    fms_.set_property('db', 'FMPHP_Sample')
+    fms_.set_db_name('FMPHP_Sample')
     return fms_
 
 
@@ -315,7 +319,7 @@ def test_cwp_01():
     https://fmhelp.filemaker.com/docs/14/en/fms14_cwp_guide.pdf
     """
     fms_ = FileMakerServer(log_level=logging.DEBUG)
-    fms_.set_property('db', 'employees')
+    fms_.set_db_name('employees')
 
     find_command = FindCommand(fms_, 'departments')
     query = find_command.get_query()
@@ -657,7 +661,7 @@ def test_cwp_01():
 
 def test_cwp_02():
     fms_ = FileMakerServer(log_level=logging.DEBUG)
-    fms_.set_property('db', 'career')
+    fms_.set_db_name('career')
 
     edit_command = EditCommand(fms_, 'applications', record_id=7)
     edit_command.set_delete_related('jobtable.20')
@@ -671,7 +675,7 @@ def test_cwp_02():
 
 def test_cwp_03():
     fms_ = FileMakerServer(log_level=logging.DEBUG)
-    fms_.set_property('db', 'members')
+    fms_.set_db_name('members')
 
     # A non-ASCII character.
     edit_command = EditCommand(fms_, 'relationships', record_id=2)
@@ -692,7 +696,7 @@ def test_cwp_03():
 
 def test_cwp_04():
     fms_ = FileMakerServer(log_level=logging.DEBUG)
-    fms_.set_property('db', 'products')
+    fms_.set_db_name('products')
 
     find_command = FindCommand(fms_, 'sales')
     query = find_command.get_query()
@@ -703,7 +707,7 @@ def test_cwp_04():
 
 def test_cwp_05():
     fms_ = FileMakerServer(log_level=logging.DEBUG)
-    fms_.set_property('db', 'petclinic')
+    fms_.set_db_name('petclinic')
 
     find_query_command = FindQueryCommand(fms_, 'Patients')
     query1 = FindQuery('typeofanimal', 'Cat')
@@ -722,7 +726,7 @@ def test_cwp_05():
 
 def test_cwp_06():
     fms_ = FileMakerServer(log_level=logging.DEBUG)
-    fms_.set_property('db', 'vetclinic')
+    fms_.set_db_name('vetclinic')
 
     find_query_command = FindQueryCommand(fms_, 'animals')
     query1 = FindQuery('typeofanimal', 'Cat')
