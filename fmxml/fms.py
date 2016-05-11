@@ -52,6 +52,10 @@ class FileMakerServer:
         self.set_username(username)
         self.set_password(password)
 
+    def close(self):
+        if self.__requests_session is not None:
+            self.__requests_session.close()
+
     @property
     def log(self):
         return self.__log
@@ -155,28 +159,32 @@ class FileMakerServer:
         return layout
 
     def get_db_names(self):
-        return self.__get_xx_names('-dbnames')
+        from fmxml.commands import Command
+        commands = [
+            Command('-dbnames'),
+        ]
+        return self.__get_names(commands)
 
     def get_layout_names(self):
-        return self.__get_xx_names('-layoutnames')
+        from fmxml.commands import Command
+        commands = [
+            Command('-db', self.db_name),
+            Command('-layoutnames'),
+        ]
+        return self.__get_names(commands)
 
     def get_script_names(self):
-        return self.__get_xx_names('-scriptnames')
+        from fmxml.commands import Command
+        commands = [
+            Command('-db', self.db_name),
+            Command('-scriptnames'),
+        ]
+        return self.__get_names(commands)
 
-    def __get_xx_names(self, xx):
-        assert xx in {'-dbnames', '-layoutnames', '-scriptnames'}
+    def __get_names(self, commands):
         from fmxml.commands import CommandContainer, Command
         from fmxml.parsers import DataGrammarParser
 
-        if xx == '-dbnames':
-            commands = [
-                Command('-dbnames'),
-            ]
-        else:
-            commands = [
-                Command('-db', self.db_name),
-                Command(xx),
-            ]
         query = CommandContainer(*commands).as_query()
 
         xml_bytes = self._execute(query)
