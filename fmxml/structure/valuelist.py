@@ -1,5 +1,4 @@
 # -*- mode: python tab-width: 4 coding: utf-8 -*-
-import collections
 import collections.abc
 from collections import namedtuple
 from enum import Enum
