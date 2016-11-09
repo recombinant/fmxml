@@ -7,8 +7,8 @@
 *.orig
 *.log
 *.pot
-__pycache__/*
-.cache/*
+__pycache__
+.cache
 .*.swp
 
 # Project files
@@ -32,8 +32,8 @@ junit.xml
 coverage.xml
 
 # Build and docs folder/files
-build/*
-dist/*
+build
+dist
 sdist/*
 docs/api/*
 docs/_build/*
