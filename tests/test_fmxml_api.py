@@ -20,7 +20,7 @@ except ImportError:
     from tests.dummy_secret import get_connection
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture()
 def fms():
     connection = get_connection('fmphp_sample')
     fms_ = FileMakerServer(log_level=logging.WARN, **connection)

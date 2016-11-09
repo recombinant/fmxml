@@ -26,7 +26,7 @@ from fmxml.commands import NewCommand
 from fmxml.fms import FMS_RELATEDSETS_FILTER_LAYOUT, FMS_RELATEDSETS_FILTER_NONE
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture()
 def fms():
     # No actual connection is required as only the query strings are being
     # tested - so no requests need to be made to the server.
@@ -35,7 +35,7 @@ def fms():
     return fms_
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture()
 def layout_name():
     return 'Form View'
 

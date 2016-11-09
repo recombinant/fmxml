@@ -166,7 +166,7 @@ class FieldContainer:
             list: All of the values for field_name
         """
         return [
-            (repetition_number, self.__fields[field_name][repetition_number])
+            (repetition_number, self.__fields[field_name][repetition_number].value)
             for repetition_number in sorted(list(self.__fields[field_name]))
             ]
 

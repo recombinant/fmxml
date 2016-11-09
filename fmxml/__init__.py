@@ -1,14 +1,7 @@
-# -*- mode: python tab-width: 4 coding: utf-8 -*-
-from .fms import FMS_FIND_AND, FMS_FIND_OR
-from .fms import FMS_SORT_ASCEND, FMS_SORT_DESCEND
-from .fms import \
-    FMS_FIND_OP_EQ, FMS_FIND_OP_NEQ, \
-    FMS_FIND_OP_GT, FMS_FIND_OP_GTE, \
-    FMS_FIND_OP_LT, FMS_FIND_OP_LTE, \
-    FMS_FIND_OP_CN, \
-    FMS_FIND_OP_BW, FMS_FIND_OP_EW
-from .fms import FMS_RELATEDSETS_FILTER_LAYOUT, FMS_RELATEDSETS_FILTER_NONE
+# -*- coding: utf-8 -*-
+import pkg_resources
 
-
-from .fms import FileMakerServer
-from .commands import FindRequestDefinition, FindQuery
+try:
+    __version__ = pkg_resources.get_distribution(__name__).version
+except:
+    __version__ = 'unknown'
