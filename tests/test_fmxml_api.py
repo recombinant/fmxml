@@ -6,7 +6,7 @@ from urllib.parse import urlsplit
 
 import pytest
 from PIL import Image
-from numpy import random
+import random
 
 from fmxml.commands import NewCommand
 from fmxml.fms import FileMakerServer
