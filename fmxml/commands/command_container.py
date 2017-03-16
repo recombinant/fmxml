@@ -1,9 +1,8 @@
 # -*- mode: python tab-width: 4 coding: utf-8 -*-
 import urllib.parse
-from _operator import attrgetter
 from collections import namedtuple, Counter
-
 from decimal import Decimal
+from operator import attrgetter
 
 SAFE_CHARS = '*!():;,/ '
 

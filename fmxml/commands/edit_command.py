@@ -20,6 +20,7 @@ class EditCommand(RecordIdMixin, BaseCommand):
         super().__init__(fms, layout_name)
 
         self.__delete_related = None
+        self.__modification_id = None
         self.__fqfn_list = []
 
         # TODO: test if fqfn with record-id is Ok (record_id parameter not required?)
@@ -56,8 +57,7 @@ class EditCommand(RecordIdMixin, BaseCommand):
         Args:
             modification_id (int, optional): A modification id. Defaults to None which means -modid omitted.
         """
-        assert modification_id is None or \
-               (isinstance(modification_id, int) and modification_id > 0)
+        assert modification_id is None or (isinstance(modification_id, int) and modification_id > 0)
         self.__modification_id = modification_id
 
     def set_delete_related(self, delete_related=None):

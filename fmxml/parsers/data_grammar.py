@@ -53,7 +53,7 @@ class RawRecord(ElemInitialiser):
 
     def __init__(self, elem):
         super().__init__(elem)
-        self.modification_id = self.mod_id
+        self.modification_id = self.mod_id  # TODO: test & fix
         del self.mod_id
         self.fields = []
         self.relatedsets = {}
@@ -98,7 +98,8 @@ class DataGrammarParser(GrammarParserBase):
             parser.feed(xml_bytes)
             return self.__parser_read_events(parser)
 
-    def __parser_read_events(self, parser):
+    @staticmethod
+    def __parser_read_events(parser):
         table_name = parent_raw_record = current_raw_record = None
 
         ns = ''  # For removal of element tag namespace.

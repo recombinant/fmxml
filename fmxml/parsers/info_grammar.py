@@ -27,7 +27,8 @@ class InfoGrammarParser(GrammarParserBase):
             parser.feed(xml_bytes)
             return self.__parser_read_events(parser)
 
-    def __parser_read_events(self, parser):
+    @staticmethod
+    def __parser_read_events(parser):
         # the DTD can be found at, say:
         # http://localhost/fmi/xml/FMPXMLLAYOUT.dtd
         fmpxmllayout = None

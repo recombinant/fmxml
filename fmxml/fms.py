@@ -35,17 +35,15 @@ class FileMakerServer:
                  '__hostspec', '__db_name', '__username', '__password',)
 
     def __init__(self,
-                 hostspec='http://localhost',
-                 username='user',
-                 password='password',
-                 db=None,
-                 log_level=logging.WARNING):
-        logging.basicConfig(level=log_level)
-        self.__log = logging.getLogger('FileMakerServer')
+                 hostspec,  # e.g. http://localhost
+                 username,
+                 password,
+                 db=None):
+        self.__log = logging.getLogger(__name__)
         # self.log.info('FileMakerServer.__init__()')
         self.__prop_lookup = {}
         self.__layout_names = {}
-        self.__requests_session = None
+        self.__hostspec = self.__username = self.__password = self.__db_name = self.__requests_session = None
 
         self.set_db_name(db or None)
         self.set_hostspec(hostspec)
@@ -182,7 +180,7 @@ class FileMakerServer:
         return self.__get_names(commands)
 
     def __get_names(self, commands):
-        from fmxml.commands import CommandContainer, Command
+        from fmxml.commands import CommandContainer
         from fmxml.parsers import DataGrammarParser
 
         query = CommandContainer(*commands).as_query()
@@ -222,7 +220,7 @@ class FileMakerServer:
 
         self.__log.info(xml_url)
 
-        resp = self.requests_session.get(url=xml_url)
+        resp = self.requests_session.get(url=xml_url, auth=(self.username, self.password))
         resp.raise_for_status()  # promulgate errors from the bowels of requests
 
         xml_bytes = resp.content
@@ -310,7 +308,7 @@ class FileMakerServer:
         # TODO: retrieve data from cache
 
         # --------------------------------------------------- retrieve the data
-        resp = self.requests_session.get(url=container_url)
+        resp = self.requests_session.get(url=container_url, auth=(self.username, self.password))
         resp.raise_for_status()  # promulgate errors from the bowels of requests
 
         container_bytes = resp.content

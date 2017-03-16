@@ -9,12 +9,12 @@ import urllib.parse
 
 import pytest
 
-from fmxml import FMS_FIND_AND
-from fmxml import \
+from fmxml.fms import FMS_FIND_AND
+from fmxml.fms import \
     FMS_FIND_OP_EQ, FMS_FIND_OP_NEQ, \
     FMS_FIND_OP_GT, FMS_FIND_OP_CN, \
     FMS_FIND_OP_BW, FMS_FIND_OP_EW
-from fmxml import FMS_SORT_ASCEND, FMS_SORT_DESCEND
+from fmxml.fms import FMS_SORT_ASCEND, FMS_SORT_DESCEND
 from fmxml import FileMakerServer
 from fmxml.commands import DeleteCommand
 from fmxml.commands import DupCommand
@@ -26,17 +26,18 @@ from fmxml.commands import NewCommand
 from fmxml.fms import FMS_RELATEDSETS_FILTER_LAYOUT, FMS_RELATEDSETS_FILTER_NONE
 
 
-@pytest.fixture()
-def fms():
+@pytest.fixture(name='fms')
+def fixture_fms():
     # No actual connection is required as only the query strings are being
     # tested - so no requests need to be made to the server.
-    fms_ = FileMakerServer(log_level=logging.DEBUG)
+    logging.basicConfig(level=logging.DEBUG)
+    fms_ = FileMakerServer(hostspec='http://localhost', username='username', password='password')
     fms_.set_db_name('FMPHP_Sample')
     return fms_
 
 
-@pytest.fixture()
-def layout_name():
+@pytest.fixture(name='layout_name')
+def fixture_layout_name():
     return 'Form View'
 
 
@@ -318,7 +319,8 @@ def test_cwp_01():
 
     https://fmhelp.filemaker.com/docs/14/en/fms14_cwp_guide.pdf
     """
-    fms_ = FileMakerServer(log_level=logging.DEBUG)
+    logging.basicConfig(level=logging.DEBUG)
+    fms_ = FileMakerServer(hostspec='http://localhost', username='username', password='password')
     fms_.set_db_name('employees')
 
     find_command = FindCommand(fms_, 'departments')
@@ -660,7 +662,8 @@ def test_cwp_01():
 
 
 def test_cwp_02():
-    fms_ = FileMakerServer(log_level=logging.DEBUG)
+    logging.basicConfig(level=logging.DEBUG)
+    fms_ = FileMakerServer(hostspec='http://localhost', username='username', password='password')
     fms_.set_db_name('career')
 
     edit_command = EditCommand(fms_, 'applications', record_id=7)
@@ -674,7 +677,8 @@ def test_cwp_02():
 
 
 def test_cwp_03():
-    fms_ = FileMakerServer(log_level=logging.DEBUG)
+    logging.basicConfig(level=logging.DEBUG)
+    fms_ = FileMakerServer(hostspec='http://localhost', username='username', password='password')
     fms_.set_db_name('members')
 
     # A non-ASCII character.
@@ -695,7 +699,8 @@ def test_cwp_03():
 
 
 def test_cwp_04():
-    fms_ = FileMakerServer(log_level=logging.DEBUG)
+    logging.basicConfig(level=logging.DEBUG)
+    fms_ = FileMakerServer(hostspec='http://localhost', username='username', password='password')
     fms_.set_db_name('products')
 
     find_command = FindCommand(fms_, 'sales')
@@ -706,7 +711,8 @@ def test_cwp_04():
 
 
 def test_cwp_05():
-    fms_ = FileMakerServer(log_level=logging.DEBUG)
+    logging.basicConfig(level=logging.DEBUG)
+    fms_ = FileMakerServer(hostspec='http://localhost', username='username', password='password')
     fms_.set_db_name('petclinic')
 
     find_query_command = FindQueryCommand(fms_, 'Patients')
@@ -725,7 +731,8 @@ def test_cwp_05():
 
 
 def test_cwp_06():
-    fms_ = FileMakerServer(log_level=logging.DEBUG)
+    logging.basicConfig(level=logging.DEBUG)
+    fms_ = FileMakerServer(hostspec='http://localhost', username='username', password='password')
     fms_.set_db_name('vetclinic')
 
     find_query_command = FindQueryCommand(fms_, 'animals')

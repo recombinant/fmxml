@@ -126,7 +126,7 @@ class FieldContainer:
                     self.set_field_value(field_name, value, repetition_number)
 
     def __missing__(self, key):
-        value = self[key] = {}
+        value = self[key] = {}  # TODO: test & fix
         return value
 
     def __copy__(self):

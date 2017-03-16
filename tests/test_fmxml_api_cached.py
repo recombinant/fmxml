@@ -7,16 +7,16 @@ responses are always the same.
 """
 import logging
 import os
+import random
 import re
 import urllib.parse
 from pathlib import Path
 from urllib.parse import SplitResult, urlsplit, urlunsplit, urlencode, parse_qsl
 
 import pytest
-from numpy import random
 
-from fmxml import FindQuery, FindRequestDefinition
 from fmxml.commands.command_container import SAFE_CHARS
+from fmxml.commands.findquery_command import FindQuery, FindRequestDefinition
 from fmxml.fms import FileMakerServer, FMS_SORT_ASCEND, FMS_FIND_OP_EW, FMS_FIND_OP_BW, \
     FMS_FIND_OP_CN, FMS_FIND_OP_EQ, FMS_FIND_OP_NEQ, FMS_SORT_DESCEND, FMS_FIND_OR
 from fmxml.structure import Record
@@ -77,7 +77,7 @@ def _execute(self, query, xml_grammar='fmresultset'):
     else:
         self.log.info(xml_url)
 
-        resp = self.requests_session.get(url=xml_url)
+        resp = self.requests_session.get(url=xml_url, auth=(self.username, self.password))
         resp.raise_for_status()  # promulgate errors from the bowels of requests
 
         xml_bytes = resp.content
@@ -88,16 +88,17 @@ def _execute(self, query, xml_grammar='fmresultset'):
     return xml_bytes
 
 
-@pytest.fixture()
-def fms_cached():
+@pytest.fixture(name='fms_cached')
+def fixture_fms_cached():
     connection = secret.get_connection('fmphp_sample')
     setattr(FileMakerServer, '_execute', _execute)  # Monkey patch.
-    fms_ = FileMakerServer(log_level=logging.INFO, **connection)
+    logging.basicConfig(level=logging.INFO)
+    fms_ = FileMakerServer(**connection)
     return fms_
 
 
-@pytest.fixture()
-def layout_name():
+@pytest.fixture(name='layout_name')
+def fixture_layout_name():
     return 'Form View'
 
 

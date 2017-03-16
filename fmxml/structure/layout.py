@@ -152,3 +152,7 @@ class Layout:
 
     def _add_portal(self, table_name, portal):
         self.__portals[table_name] = portal
+
+    @property
+    def portal_names(self):
+        return list(self.__portals)

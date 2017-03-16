@@ -53,9 +53,8 @@ class Valuelist(collections.abc.Sequence):
         return iter(self.__valuelist)
 
     def __repr__(self):
-        return 'Valuelist(name={}, valuelist_display={}, valuelist={})' \
+        return 'Valuelist(name={}, valuelist={})' \
             .format(repr(self.__name),
-                    self.__display,
                     repr(self.__valuelist))
 
     # The following do not make any sense in the context of a value list.

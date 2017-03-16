@@ -51,7 +51,8 @@ class DataGrammar2Parser(GrammarParserBase):
             parser.feed(xml_bytes)
             return self.__parser_read_events(parser)
 
-    def __parser_read_events(self, parser):
+    @staticmethod
+    def __parser_read_events(parser):
         fmpxmlresult = None
         ns = ''  # For removal of element tag namespace.
         nsl = 0  # Length of ns

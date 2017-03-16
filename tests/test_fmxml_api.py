@@ -20,19 +20,20 @@ except ImportError:
     from tests.dummy_secret import get_connection
 
 
-@pytest.fixture()
-def fms():
+@pytest.fixture(name='fms')
+def fixture_fms():
+    logging.basicConfig(level=logging.WARN)
     connection = get_connection('fmphp_sample')
-    fms_ = FileMakerServer(log_level=logging.WARN, **connection)
+    fms_ = FileMakerServer(**connection)
     return fms_
 
 
-@pytest.fixture()
-def layout_name():
+@pytest.fixture(name='layout_name')
+def fixture_layout_name():
     return 'Form View'
 
 
-def test_01_db_names(fms):
+def test_01_db_names():
     """
     Check that get_database_names() works and that
     the "FMPHP_Sample" is present.
