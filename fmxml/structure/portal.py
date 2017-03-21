@@ -20,7 +20,7 @@ class Portal:
     def table_name(self):
         return self.__table_name
 
-    def _add_field_definition(self, field_name, field_definition):
+    def add_field_definition_(self, field_name, field_definition):
         self.__field_definition_lookup[field_name] = field_definition
 
     @property

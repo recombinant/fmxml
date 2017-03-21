@@ -1,8 +1,23 @@
 # -*- mode: python tab-width: 4 coding: utf-8 -*-
 from collections import Counter
+from typing import List, Any, Tuple, Dict, Iterator, Union
+
+from . import field as field_module
+from . import layout as layout_module
+from . import portal as portal_module
+
+# Passed to FieldContainer constructor
+# { field_name: { repetition_number: field_value } }
+FieldValueDict = Dict[str, Dict[int, Any]]
+
+# Internal to FieldContainer
+# { field_name: { repetition_number: Field } }
+FieldLookup = Dict[str, Dict[int, 'field_module.Field']]
+
+LayerPortal = Union[layout_module.Layout, portal_module.Portal]
 
 
-def single_field_factory(layout, field_values):
+def single_field_factory(layout: LayerPortal, field_values):
     """
     Takes::
         {field_name1: value1, field_name2: value2}
@@ -25,7 +40,8 @@ def single_field_factory(layout, field_values):
     if isinstance(field_values, dict):
         field_values = list(field_values.items())
 
-    field_value_dict = dict()
+    field_value_dict = dict()  # type: FieldValueDict
+
     for field_name, field_value in field_values:
         # repetition number 1
         field_value_dict[field_name] = {0: field_value}
@@ -33,7 +49,7 @@ def single_field_factory(layout, field_values):
     return FieldContainer(layout, field_value_dict)
 
 
-def repetition_field_factory(layout, field_values):
+def repetition_field_factory(layout: LayerPortal, field_values):
     """
     Much like :py:func:`.single_field_factory` but allows for repetition of fields -
     though they do not have to be repeated.
@@ -63,7 +79,8 @@ def repetition_field_factory(layout, field_values):
     if isinstance(field_values, dict):
         field_values = list(field_values.items())
 
-    field_value_dict = dict()
+    field_value_dict = dict()  # type: FieldValueDict
+
     for field_name, field_value_sequence in field_values:
         field_value_dict[field_name] = {
             repetition_number: field_value
@@ -98,7 +115,7 @@ def _raw_record_field_factory(layout, raw_records):
     assert not fields or Counter(field[0] for field in fields).most_common(1)[0][1] == 1, (
         Counter(field[0] for field in fields).most_common(1)[0][0])
 
-    field_value_dict = dict()
+    field_value_dict = dict()  # type: FieldValueDict
     for field_name, field_value_sequence in fields:
         field_value_dict[field_name] = {
             repetition_number: field_value
@@ -108,15 +125,15 @@ def _raw_record_field_factory(layout, raw_records):
 
 
 class FieldContainer:
-    def __init__(self, layout, field_value_dict=None):
-        from .layout import Layout
-        from .portal import Portal
+    def __init__(self, layout: LayerPortal, field_value_dict: FieldValueDict = None):
+        from ..fms import FileMakerServer
 
-        assert isinstance(layout, (Layout, Portal)), layout
+        assert isinstance(layout, (layout_module.Layout, portal_module.Portal)), layout
 
-        self.__fm = layout.fms  # for datasource date-format etc.
-        self.__layout = layout
-        self.__fields = {}
+        # for datasource date-format etc.
+        self.__fms = layout.fms  # type: FileMakerServer
+        self.__layout = layout  # type: LayerPortal
+        self.__fields = {}  # type: FieldLookup
         # Calling set_field_value() will find the field properties and
         # convert them appropriately where possible.
         if field_value_dict is not None:
@@ -137,68 +154,66 @@ class FieldContainer:
         raise NotImplementedError
 
     @property
-    def names(self):
+    def names(self) -> List[str]:
         names = list(self.__fields)
         names.sort()
         return names
 
-    def set_field_value(self, field_name, value, repetition_number):
-        from .field import Field
+    def set_field_value(self, field_name: str, value, repetition_number: int):
         assert isinstance(repetition_number, int), repetition_number
         if field_name not in self.__fields:
             self.__fields[field_name] = {}
         # TODO: convert here is necessary
         if repetition_number not in self.__fields[field_name]:
-            self.__fields[field_name][repetition_number] = Field(self.__layout, field_name, value)
+            self.__fields[field_name][repetition_number] = field_module.Field(self.__layout, field_name, value)
         else:
             self.__fields[field_name][repetition_number].set_value(value)
 
-    def get_field_value(self, field_name, repetition_number=0):
+    def get_field_value(self, field_name: str, repetition_number: int = 0):
         return self.__fields[field_name][repetition_number].value
 
-    def get_field_repetitions(self, field_name):
-        """
+    def __get_field_repetition_numbers(self, field_name: str) -> Tuple[Dict[int, 'field_module.Field'], List[int]]:
+        fields = self.__fields[field_name]  # type: Dict[int, field_module.Field]
+        repetition_numbers = list(fields)
+        repetition_numbers.sort()
+        return fields, repetition_numbers
 
-        Args:
-            field_name:
+    def get_field_values(self, field_name: str) -> List[Any]:
+        fields, repetition_numbers = self.__get_field_repetition_numbers(field_name)
+        return [fields[num].value for num in repetition_numbers]
 
-        Returns:
-            list: All of the values for field_name
-        """
-        return [
-            (repetition_number, self.__fields[field_name][repetition_number].value)
-            for repetition_number in sorted(list(self.__fields[field_name]))
-            ]
-
-    def iter_fields(self):
+    def iter_fields(self) -> Iterator[Tuple[str, Any, int]]:
         for field_name in self.__fields:
-            for repetition_number in sorted(list(self.__fields[field_name])):
-                field = self.__fields[field_name][repetition_number]
-                yield field.name, field.value, repetition_number
+            fields, repetition_numbers = self.__get_field_repetition_numbers(field_name)
+            for num in repetition_numbers:
+                field = fields[num]
+                yield field.name, field.value, num
 
     def iter_updated_fields(self):
         for field_name in self.__fields:
-            for repetition_number in sorted(list(self.__fields[field_name])):
-                field = self.__fields[field_name][repetition_number]
+            fields, repetition_numbers = self.__get_field_repetition_numbers(field_name)
+            for num in repetition_numbers:
+                field = fields[num]
                 if field.is_updated():
-                    yield field.name, field.value, repetition_number
+                    yield field.name, field.value, num
 
     def iter_updated_fields_unmunged(self):
         for field_name in self.__fields:
-            for repetition_number in sorted(list(self.__fields[field_name])):
-                field = self.__fields[field_name][repetition_number]
+            fields, repetition_numbers = self.__get_field_repetition_numbers(field_name)
+            for num in repetition_numbers:
+                field = fields[num]
                 if field.is_updated():
-                    yield field.name, field.unmunged_value, repetition_number
+                    yield field.name, field.unmunged_value, num
 
     def _partial_copy(self, *field_names):
         # extract field name(s) as a new FieldContainer, for testing.
-        # {field_name: {repetition_number: value, ...}, ...}
+        # {field_name: {num: value, ...}, ...}
         # If all field_names are provided then a complete copy is created.
         return FieldContainer(
             self.__layout,
-            {field_name:
-                 {repetition_number: self.__fields[field_name][repetition_number].value
-                  for repetition_number in sorted(list(self.__fields[field_name]))}
+            {field_name: {num: self.__fields[field_name][num].value
+                          for num in sorted(list(self.__fields[field_name]))
+                          }
              for field_name in field_names
              })
 
@@ -207,10 +222,10 @@ class FieldContainer:
         # This allows access to the internals of FieldContainer which may change.
         return self.__fields
 
-    def _clear_update_flags(self):
+    def clear_update_flags_(self):
         for field_name in self.__fields:
             for repetition_number in self.__fields[field_name]:
-                self.__fields[field_name][repetition_number]._clear_update_flag()
+                self.__fields[field_name][repetition_number].clear_update_flag_()
 
     def validate(self, field_name=None):
         if field_name:

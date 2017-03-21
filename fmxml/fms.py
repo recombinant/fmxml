@@ -103,38 +103,38 @@ class FileMakerServer:
             return None
 
     def create_dup_record_command(self, layout_name, record_id=None):
-        from fmxml.commands import DupCommand
+        from .commands import DupCommand
         return DupCommand(self, layout_name, record_id)
 
     def create_delete_record_command(self, layout_name, record_id=None):
-        from fmxml.commands import DeleteCommand
+        from .commands import DeleteCommand
         return DeleteCommand(self, layout_name, record_id)
 
     def create_edit_record_command(self, layout_name, record_id=None, modification_id=None):
-        from fmxml.commands import EditCommand
+        from .commands import EditCommand
         return EditCommand(self, layout_name, record_id, modification_id)
 
     def create_find_records_command(self, layout_name):
-        from fmxml.commands import FindCommand
+        from .commands import FindCommand
         return FindCommand(self, layout_name)
 
     def create_findany_record_command(self, layout_name):
-        from fmxml.commands import FindAnyCommand
+        from .commands import FindAnyCommand
         return FindAnyCommand(self, layout_name)
 
     def create_findquery_command(self, layout_name):
-        from fmxml.commands import FindQueryCommand
+        from .commands import FindQueryCommand
         return FindQueryCommand(self, layout_name)
 
     def create_new_record_command(self, layout_name):
-        from fmxml.commands import NewCommand
+        from .commands import NewCommand
         # TODO: field container.
         return NewCommand(self, layout_name)
 
     def get_layout(self, layout_name):
-        from fmxml.structure import Layout
-        from fmxml.commands import CommandContainer, Command
-        from fmxml.parsers import DataGrammarParser
+        from .structure import Layout
+        from .commands import CommandContainer, Command
+        from .parsers import DataGrammarParser
 
         if layout_name in self.__layout_names:
             return self.__layout_names[layout_name]
@@ -146,7 +146,7 @@ class FileMakerServer:
         ]
         query = CommandContainer(*command_params).as_query()
 
-        xml_bytes = self._execute(query)
+        xml_bytes = self.execute_(query)
         assert xml_bytes
 
         parser = DataGrammarParser()
@@ -157,14 +157,14 @@ class FileMakerServer:
         return layout
 
     def get_db_names(self):
-        from fmxml.commands import Command
+        from .commands import Command
         commands = [
             Command('-dbnames'),
         ]
         return self.__get_names(commands)
 
     def get_layout_names(self):
-        from fmxml.commands import Command
+        from .commands import Command
         commands = [
             Command('-db', self.db_name),
             Command('-layoutnames'),
@@ -172,7 +172,7 @@ class FileMakerServer:
         return self.__get_names(commands)
 
     def get_script_names(self):
-        from fmxml.commands import Command
+        from .commands import Command
         commands = [
             Command('-db', self.db_name),
             Command('-scriptnames'),
@@ -180,12 +180,12 @@ class FileMakerServer:
         return self.__get_names(commands)
 
     def __get_names(self, commands):
-        from fmxml.commands import CommandContainer
-        from fmxml.parsers import DataGrammarParser
+        from .commands import CommandContainer
+        from .parsers import DataGrammarParser
 
         query = CommandContainer(*commands).as_query()
 
-        xml_bytes = self._execute(query)
+        xml_bytes = self.execute_(query)
         assert xml_bytes
 
         parser = DataGrammarParser()
@@ -196,7 +196,7 @@ class FileMakerServer:
         names = filter(bool, names)
         return list(names)
 
-    def _execute(self, query, xml_grammar='fmresultset'):
+    def execute_(self, query, xml_grammar='fmresultset'):
         """
         Args:
             query (str): Query part of url created elsewhere.

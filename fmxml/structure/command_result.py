@@ -1,6 +1,10 @@
 # -*- mode: python tab-width: 4 coding: utf-8 -*-
 from builtins import property
 from collections import Counter
+from typing import List
+
+from . import layout as layout_module
+from . import record as record_module
 
 
 class CommandResult:
@@ -8,9 +12,6 @@ class CommandResult:
                  '__fetch_size', '__records', '__total_count',)
 
     def __init__(self, fms, parsed_data):
-        from ..structure import Layout
-        from ..structure import Record
-
         self.__fms = fms
 
         self.__error_code = int(parsed_data.error.code)
@@ -24,8 +25,8 @@ class CommandResult:
             to eliminate name collision with other variables in scope.
             """
             _field_container = _raw_record_field_factory(layout_, raw_record_.fields)
-            _record = Record(layout_, _field_container)
-            _record._set_record_id(int(raw_record_.record_id))
+            _record = record_module.Record(layout_, _field_container)
+            _record.set_record_id_(int(raw_record_.record_id))
             _record.set_modification_id(int(raw_record_.modification_id))
             return _record
 
@@ -49,40 +50,38 @@ class CommandResult:
                         new_portal_record = _create_new_record(
                             self.__layout,
                             portal_raw_record)
-                        new_record._add_portal_record(table_name, new_portal_record)
+                        new_record.add_portal_record_(table_name, new_portal_record)
 
             record_list.append(new_record)
 
-        self.__records = record_list
+        self.__records = record_list  # type: List[record_module.Record]
 
     @property
-    def layout(self):
+    def layout(self) -> 'layout_module.Layout':
         return self.__layout
 
     @property
-    def records(self):
+    def records(self) -> List['record_module.Record']:
         return self.__records
 
     @property
-    def field_names(self):
+    def field_names(self) -> List[str]:
         return self.__layout.field_names
 
     @property
-    def portal_names(self):
+    def portal_names(self) -> List[str]:
         return self.__layout.portal_names
 
     @property
-    def total_count(self):
-        assert isinstance(self.__total_count, int)
+    def total_count(self) -> int:
         return self.__total_count
 
     @property
-    def found_count(self):
-        assert isinstance(self.__found_count, int)
+    def found_count(self) -> int:
         return self.__found_count
 
     @property
-    def fetch_size(self):
+    def fetch_size(self) -> int:
         return self.__fetch_size
 
 

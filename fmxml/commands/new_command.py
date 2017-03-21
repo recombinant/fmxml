@@ -40,13 +40,13 @@ class NewCommand(BaseCommand):
         """
         self.__fqfn_list.append(NewField(fqfn, value))
 
-    def set_field_value(self, field_name, value, repetition=0):
+    def set_field_value(self, field_name, value, repetition_number=0):
         assert isinstance(field_name, str)
         assert isinstance(value, (int, str, Decimal, datetime.date)), type(value)
-        assert isinstance(repetition, int)
+        assert isinstance(repetition_number, int)
 
         if isinstance(value, datetime.date):
             value = value.strftime('%m/%d/%Y')
 
-        fqfn = '{}({})'.format(field_name, repetition)
+        fqfn = '{}({})'.format(field_name, repetition_number)
         self.add_new_fqfn(fqfn, value)

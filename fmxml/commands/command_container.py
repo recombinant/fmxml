@@ -42,7 +42,7 @@ class CommandContainer:
     >>> len(cc)
     5
     >>> import re
-    >>> cc._remove(re.compile(r'-sort.*'))
+    >>> cc.remove_(re.compile(r'-sort.*'))
     >>> len(cc)
     3
     """
@@ -61,7 +61,7 @@ class CommandContainer:
     def __len__(self):
         return len(self.__data)
 
-    def _remove(self, regex_obj):
+    def remove_(self, regex_obj):
         """
         :param regex_obj: regular expression object to test against.
             Removes any commands that match.

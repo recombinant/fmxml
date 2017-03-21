@@ -6,7 +6,7 @@ class Field:
         self.__layout = layout
         self.__name = name
         self.__field_definition = layout.get_field_definition(name)
-        self.__value = self.__field_definition._munge_value(value)
+        self.__value = self.__field_definition.munge_value(value)
 
     @property
     def name(self):
@@ -18,7 +18,7 @@ class Field:
 
     def set_value(self, value):
         if value != self.__value:
-            self.__value = self.__field_definition._munge_value(value)
+            self.__value = self.__field_definition.munge_value(value)
         return value
 
     @property
@@ -28,7 +28,13 @@ class Field:
             A value suitable for the FileMaker field definition
             defining this field.
         """
-        return self.__field_definition._unmunge_value(self.__value)
+        return self.__field_definition.unmunge_value(self.__value)
 
     def validate(self):
         return self.__field_definition.validate(self.__value)
+
+    def is_updated(self):
+        raise NotImplementedError  # TODO: refactor to make this work
+
+    def clear_update_flag_(self):
+        raise NotImplementedError  # TODO: refactor to make this work

@@ -1,6 +1,10 @@
 # -*- mode: python tab-width: 4 coding: utf-8 -*-
 from collections import defaultdict
 from copy import copy
+from typing import List, Any, Optional
+
+from . import field_container as fc_module
+from . import layout as layout_module
 
 
 class Record:
@@ -13,27 +17,27 @@ class Record:
                  '__parent_record',
                  '__portal_name',)
 
-    def __init__(self, layout, field_container=None):
-        from .layout import Layout
+    def __init__(self,
+                 layout: 'layout_module.Layout',
+                 field_container: 'fc_module.FieldContainer' = None):
         assert layout
-        assert isinstance(layout, Layout)
+        assert isinstance(layout, layout_module.Layout)
 
-        self.__layout = layout
+        self.__layout = layout  # type: layout_module.Layout
         self.__fms = layout.fms
         self.__record_id = None
         self.__modification_id = None
         self.__portal_records = defaultdict(list)
         self.__parent_record = None
-        self.__portal_name = None
+        self.__portal_name: str = None
 
         if field_container is None:
-            from .field_container import FieldContainer
-            self.__field_container = FieldContainer(layout)
+            self.__field_container = fc_module.FieldContainer(layout)  # type: fc_module.FieldContainer
         else:
-            self.__field_container = copy(field_container)
+            self.__field_container: fc_module.FieldContainer = copy(field_container)  # type: fc_module.FieldContainer
 
     @property
-    def layout(self):
+    def layout(self) -> layout_module.Layout:
         return self.__layout
 
     @property
@@ -48,7 +52,7 @@ class Record:
     def field_names(self):
         return self.__layout.field_names
 
-    def _set_record_id(self, record_id):
+    def set_record_id_(self, record_id):
         assert isinstance(record_id, int)
         self.__record_id = record_id
 
@@ -60,17 +64,20 @@ class Record:
     def portal_table_names(self):
         return list(self.__portal_records)
 
-    def _add_portal_record(self, table_name, portal_record):
+    def add_portal_record_(self, table_name, portal_record):
         self.__portal_records[table_name].append(portal_record)
         portal_record.__portal_name = table_name
         portal_record.__parent_record = self
 
     @property
-    def parent(self):
+    def parent(self) -> Optional['Record']:
         return self.__parent_record
 
-    def get_field_value(self, field_name, repetition=0):
-        return self.__field_container.get_field_value(field_name, repetition)
+    def get_field_value(self, field_name: str, repetition_number: int = 0) -> Any:
+        return self.__field_container.get_field_value(field_name, repetition_number)
+
+    def get_field_values(self, field_name: str) -> List[Any]:
+        return self.__field_container.get_field_values(field_name)
 
     def delete(self):
         assert self.__record_id

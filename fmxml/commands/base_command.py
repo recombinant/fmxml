@@ -30,7 +30,7 @@ class BaseCommand:
 
     def execute(self):
         query = self.get_query()
-        xml_bytes = self.__fms._execute(query)
+        xml_bytes = self.__fms.execute_(query)
         assert xml_bytes
 
         parsed_data = DataGrammarParser().parse(xml_bytes)

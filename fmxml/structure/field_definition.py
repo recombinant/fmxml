@@ -85,7 +85,7 @@ class FieldDefinition:
         """
         return self.__layout
 
-    def _munge_value(self, value):
+    def munge_value(self, value):
         """
         Create a suitable internal representation of the value. If it value
         does not match expected format the value is left unchanged.
@@ -166,7 +166,7 @@ class FieldDefinition:
                                      .format(self.__field_name, value))
             return value
 
-    def _set_valuelist_name(self, valuelist_name):
+    def set_valuelist_name_(self, valuelist_name):
         assert valuelist_name
         assert isinstance(valuelist_name, str)
         assert self.__valuelist_name is None or self.__valuelist_name == valuelist_name
