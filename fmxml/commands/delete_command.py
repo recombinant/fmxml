@@ -1,17 +1,20 @@
-# -*- mode: python tab-width: 4 coding: utf-8 -*-
+#
+# coding: utf-8
+#
+# fmxml.commands.delete_command
+#
 from .base_command import BaseCommand
-from .mixins import RecordIdMixin, ScriptsMixin
+from .mixins import RecordIdMixin, ScriptMixin
 
 
-class DeleteCommand(RecordIdMixin, ScriptsMixin, BaseCommand):
+class DeleteCommand(RecordIdMixin, ScriptMixin, BaseCommand):
     """
     –delete (Delete record) query command
     """
-    __slots__ = ()
 
     def __init__(self, fms, layout_name, record_id):
         super().__init__(fms, layout_name)
-        self.set_record_id(record_id)
+        self.record_id = record_id  # property in RecordIdMixin
 
     def get_query(self):
         assert self.record_id is not None

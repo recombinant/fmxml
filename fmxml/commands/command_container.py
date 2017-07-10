@@ -1,13 +1,29 @@
-# -*- mode: python tab-width: 4 coding: utf-8 -*-
+#
+# coding: utf-8
+#
+# fmxml.commands.command_container
+#
 import urllib.parse
-from collections import namedtuple, Counter
-from decimal import Decimal
+from collections import Counter
 from operator import attrgetter
 
 SAFE_CHARS = '*!():;,/ '
 
-Command = namedtuple('Command', 'cmd arg')
-Command.__new__.__defaults__ = (None,)
+
+# TODO: 20170630 should use NamedTuple for Command - hints is borked.
+# Command = namedtuple('Command', 'cmd arg')
+# Command.__new__.__defaults__ = (None,)
+# # or
+# class Command(NamedTuple):
+#     cmd: str
+#     arg: str = None
+class Command:
+    def __init__(self, cmd, arg=None):
+        self.cmd = cmd
+        self.arg = arg
+
+    def __repr__(self):
+        return f'Command(cmd={self.cmd!r}, arg={self.arg!r})'
 
 
 class CommandContainer:
@@ -21,8 +37,8 @@ class CommandContainer:
     >>> cc['-view'] = None
     >>> cc.empty()
     False
-    >>> for cmd, arg in cc:
-    ...     print(cmd, arg)
+    >>> for command in cc:
+    ...     print(command.cmd, command.arg)
     -db FMPHP_Sample
     -lay Form View
     -view None
@@ -31,6 +47,16 @@ class CommandContainer:
     >>> del cc['-view']
     >>> cc.has_cmd('-view')
     False
+
+    # Test Command class
+    >>> Command('-db', 'employees')
+    Command(cmd='-db', arg='employees')
+    >>> Command('-findall')
+    Command(cmd='-findall', arg=None)
+    >>> import pytest
+    >>> with pytest.raises(TypeError):
+    ...     Command()
+
     >>> command_params = [
     ...    Command('-db', 'employees'),
     ...    Command('-lay', 'performance'),
@@ -48,84 +74,89 @@ class CommandContainer:
     """
 
     def __init__(self, *commands):
-        self.__data = []
+        self._data = []
         for command in commands:
-            self.__data.append(Command(command.cmd, command.arg))
+            self._data.append(Command(command.cmd, command.arg))
 
     def __setitem__(self, cmd, arg):
-        self.__data.append(Command(cmd, arg))
+        self._data.append(Command(cmd, arg))
 
     def __iter__(self):
-        yield from self.__data
+        yield from self._data
 
     def __len__(self):
-        return len(self.__data)
+        return len(self._data)
 
-    def remove_(self, regex_obj):
+    def remove_(self, cre):
         """
-        :param regex_obj: regular expression object to test against.
+        :param cre: compiled regular expression object to test against.
             Removes any commands that match.
         :return:
         """
         deletable = []
-        for idx, (cmd, arg) in enumerate(self.__data):
-            if regex_obj.match(cmd):
+        for idx, command in enumerate(self._data):
+            if cre.match(command.cmd):
                 deletable.append(idx)
 
         deletable.reverse()
         for idx in deletable:
-            del self.__data[idx]
+            del self._data[idx]
 
     # TODO: development code
     def __delitem__(self, key):
         # Check that there is only one.
-        counter = Counter(map(attrgetter('cmd'), self.__data))
+        counter = Counter(map(attrgetter('cmd'), self._data))
         assert counter[key] == 1
 
-        for idx, (cmd, arg) in enumerate(self.__data):
-            if cmd == key:
-                del self.__data[idx]
+        for idx, command in enumerate(self._data):
+            if command.cmd == key:
+                del self._data[idx]
                 return
 
     # TODO: development code
     def empty(self):
-        return not bool(self.__data)
+        return not bool(self._data)
 
     # TODO: development code
     def has_cmd(self, cmd):
         assert isinstance(cmd, str)
-        return any(command.cmd == cmd for command in self.__data)
+        return any(command.cmd == cmd for command in self._data)
 
     def as_query(self):
         """
         Returns:
-            str: Suitable for the parameter section of a FileMaker url query.
+            String suitable for the parameter section of a FileMaker url query.
         """
-        start, end = [], []
+        start_list, end_list = [], []
         # URL encode the query, but don't put =arg on the trailing "command"
-        for cmd, arg in self.__data:
-            assert isinstance(cmd, str)
-            assert isinstance(arg, (str, int, Decimal, type(None)))
+        for command in self._data:
+            # TODO: not necessary when using NamedTuple for Command
+            cmd = command.cmd
+            arg = command.arg
+
             if arg is not None:
-                start.append((cmd, arg))  # cmd=arg
+                start_list.append((cmd, arg))  # cmd=arg
             else:
-                end.append(cmd)  # cmd
+                end_list.append(cmd)  # cmd
 
-        if start:
+        if start_list:
             # Command parameters - not HTML so safe= can be extended.
-            start = urllib.parse.urlencode(start, safe=SAFE_CHARS, encoding='utf-8',
-                                           quote_via=urllib.parse.quote)
+            start_string = urllib.parse.urlencode(start_list,
+                                                  safe=SAFE_CHARS,
+                                                  encoding='utf-8',
+                                                  quote_via=urllib.parse.quote)
+        else:
+            start_string = ''
 
-        if end:
+        if end_list:
             # command verb, there should only be one
-            assert len(end) == 1
+            assert len(end_list) == 1
             # ASCII - therefore no encoding needed
-            end = end[-1]
+            end_string = end_list[-1]
+        else:
+            raise AssertionError('Invalid command parameter sequence')  # pragma: no cover
 
-        if start and end:
-            return '&'.join([start, end])
-
-        if end:
-            return end
-
-        raise AssertionError('Invalid command parameter sequence')  # pragma: no cover
+        if start_string:
+            return '&'.join([start_string, end_string])
+        else:
+            return end_string

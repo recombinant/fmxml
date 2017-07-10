@@ -1,4 +1,8 @@
-# -*- mode: python tab-width: 4 coding: utf-8 -*-
+#
+# coding: utf-8
+#
+# fmxml.structure.valuelist
+#
 import collections.abc
 from collections import namedtuple
 from enum import Enum
@@ -20,42 +24,42 @@ class ValuelistDisplayEnum(Enum):
 
 
 class Valuelist(collections.abc.Sequence):
-    __slots__ = ('__name', '__type', '__valuelist')
+    __slots__ = ('_name', '_type', '_valuelist')
 
     def __init__(self, name, raw_values):
-        self.__name = name
+        self._name = name
 
         # this is good estimate at the type of value list
         if all(raw_value.display == raw_value.text for raw_value in raw_values):
-            self.__type = ValuelistDisplayEnum.VALUELIST_FIRST
+            self._type = ValuelistDisplayEnum.VALUELIST_FIRST
         elif all(raw_value.display.startswith('{} '.format(raw_value.text))
                  for raw_value in raw_values):
-            self.__type = ValuelistDisplayEnum.VALUELIST_BOTH
+            self._type = ValuelistDisplayEnum.VALUELIST_BOTH
         else:
-            self.__type = ValuelistDisplayEnum.VALUELIST_SECOND
+            self._type = ValuelistDisplayEnum.VALUELIST_SECOND
 
-        self.__valuelist = [
+        self._valuelist = [
             ValueTuple(display=raw_value.display, text=raw_value.text)
             for raw_value in raw_values
-            ]
+        ]
 
     @property
     def name(self):
-        return self.__name
+        return self._name
 
     def __getitem__(self, item):
-        return self.__valuelist[item]
+        return self._valuelist[item]
 
     def __len__(self):
-        return len(self.__valuelist)
+        return len(self._valuelist)
 
     def __iter__(self):
-        return iter(self.__valuelist)
+        return iter(self._valuelist)
 
     def __repr__(self):
         return 'Valuelist(name={}, valuelist={})' \
-            .format(repr(self.__name),
-                    repr(self.__valuelist))
+            .format(repr(self._name),
+                    repr(self._valuelist))
 
     # The following do not make any sense in the context of a value list.
     def __contains__(self, item):

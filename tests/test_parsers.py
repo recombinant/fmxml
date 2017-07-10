@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
-# -*- mode: python tab-width: 4 coding: utf-8 -*-
+# coding: utf-8
+#
+# test_parsers
+#
 import logging
 import os
 import re
 from pathlib import Path
 
-from fmxml.parsers import DataGrammarParser
 from fmxml.parsers import DataGrammar2Parser
+from fmxml.parsers import DataGrammarParser
 from fmxml.parsers import InfoGrammarParser
 
 __author__ = "recombinant"
@@ -16,20 +19,21 @@ __license__ = "BSD"
 logging.basicConfig(level=logging.DEBUG)
 
 
-def test_data_grammar_db():
-    path = Path(__file__).parent / 'data' / 'fmresultset-dbnames.xml'
-    fmresultset = _get_data_grammar_from_file(path)
-
-    assert fmresultset.datasource.database == 'DBNAMES'
-    # assert fmresultset.datasource.total_count == '1'
-    assert len(fmresultset.field_definitions) == 1
-    assert fmresultset.field_definitions[0].name == 'DATABASE_NAME'
-    # assert fmresultset.resultset.count == '1'
-    # assert fmresultset.resultset.fetch_size == '1'
-    # assert len(fmresultset.resultset.records) == 1
-    assert len(fmresultset.resultset.records[0].fields) == 1
-    assert fmresultset.resultset.records[0].fields[0].name == 'DATABASE_NAME'
-    assert fmresultset.resultset.records[0].fields[0].data == ['FMPHP_Sample', ]
+# TODO:
+# def test_data_grammar_db():
+#     path = Path(__file__).parent / 'data' / 'fmresultset-dbnames.xml'
+#     fmresultset = _get_data_grammar_from_file(path)
+#
+#     assert fmresultset.datasource.database == 'DBNAMES'
+#     # assert fmresultset.datasource.total_count == '1'
+#     assert len(fmresultset.field_definitions) == 1
+#     assert fmresultset.field_definitions[0].name == 'DATABASE_NAME'
+#     # assert fmresultset.resultset.count == '1'
+#     # assert fmresultset.resultset.fetch_size == '1'
+#     # assert len(fmresultset.resultset.records) == 1
+#     assert len(fmresultset.resultset.records[0].fields) == 1
+#     assert fmresultset.resultset.records[0].fields[0].name == 'DATABASE_NAME'
+#     assert fmresultset.resultset.records[0].fields[0].data == ['FMPHP_Sample', ]
 
 
 def test_data_grammar_layout():
@@ -73,11 +77,12 @@ def test_coverage():
 
 
 def _get_info_grammar_from_file(xml_path):
-    xml_path = str(xml_path)
+    xml_path = os.fspath(xml_path)
     if os.name == 'nt':
+        # Convert to UNC
         # Need to check for overly long file names.
         if not xml_path.startswith('\\\\?\\') and len(xml_path) > 260:
-            if not re.match(r'\A[a-z]:\\', xml_path, re.I):
+            if not re.match(r'^[a-z]:\\', xml_path, re.I):
                 raise AssertionError('path length too long: {!r}'.format(xml_path))
             xml_path = r'\\?\{}'.format(xml_path)
 
@@ -89,11 +94,12 @@ def _get_info_grammar_from_file(xml_path):
 
 
 def _get_data_grammar_from_file(xml_path):
-    xml_path = str(xml_path)
+    xml_path = os.fspath(xml_path)
     if os.name == 'nt':
+        # Convert to UNC
         # Need to check for overly long file names.
         if not xml_path.startswith('\\\\?\\') and len(xml_path) > 260:
-            if not re.match(r'\A[a-z]:\\', xml_path, re.I):
+            if not re.match(r'^[a-z]:\\', xml_path, re.I):
                 raise AssertionError('path length too long: {!r}'.format(xml_path))
             xml_path = r'\\?\{}'.format(xml_path)
 

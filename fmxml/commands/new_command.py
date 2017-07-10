@@ -1,7 +1,10 @@
-# -*- mode: python tab-width: 4 coding: utf-8 -*-
+#
+# coding: utf-8
+#
+# fmxml.commands.new_command
+#
 import datetime
 from collections import namedtuple
-
 from decimal import Decimal
 
 from .base_command import BaseCommand
@@ -13,16 +16,16 @@ class NewCommand(BaseCommand):
     """
     –new (New record) query command
     """
-    __slots__ = ('__fqfn_list',)
+    __slots__ = ('_fqfn_list',)
 
     def __init__(self, fms, layout_name):
         super().__init__(fms, layout_name)
-        self.__fqfn_list = []
+        self._fqfn_list = []
 
     def get_query(self):
         command_params = super().get_command_params()
 
-        for field in self.__fqfn_list:
+        for field in self._fqfn_list:
             command_params[field.fqfn] = field.value
 
         command_params['-new'] = None
@@ -38,7 +41,7 @@ class NewCommand(BaseCommand):
             fqfn: Fully qualified field name.
             value: Value of the field.
         """
-        self.__fqfn_list.append(NewField(fqfn, value))
+        self._fqfn_list.append(NewField(fqfn, value))
 
     def set_field_value(self, field_name, value, repetition_number=0):
         assert isinstance(field_name, str)

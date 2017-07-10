@@ -1,4 +1,8 @@
-# -*- mode: python tab-width: 4 coding: utf-8 -*-
+#
+# coding: utf-8
+#
+# fmxml.structure.__init__
+#
 from .command_result import CommandResult
 from .field import Field
 from .field_container import FieldContainer

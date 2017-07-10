@@ -1,24 +1,31 @@
-# -*- mode: python tab-width: 4 coding: utf-8 -*-
-class ScriptDetails:
+#
+# coding: utf-8
+#
+# fmxml.commands.mixins.script_mixin
+#
+from .. import base_command as base_command_module
+
+
+class ScriptDetail:
     """
     Shared mixins cannot inherit from a shared base class if they share
     variables. Hence the use of this class to be instantiated as a member
     variable in the similar mixins.
     """
-    __slots__ = ['__pre', '__script_name', '__script_params']
+    __slots__ = ('_pre', '_script_name', '_script_params',)
 
     def __init__(self, pre):
         assert isinstance(pre, str)
-        self.__pre = pre
-        self.__script_name = None
-        self.__script_params = None
+        self._pre = pre
+        self._script_name = None
+        self._script_params = None
 
     def get_command_params(self, command_params):
-        if self.__script_name is not None:
-            command_params['-script{}'.format(self.__pre)] = self.__script_name
-            if self.__script_params:
-                command_params['-script{}.param'.format(self.__pre)] = '|'.join(
-                    self.__script_params)
+        if self._script_name is not None:
+            command_params[f'-script{self._pre}'] = self._script_name
+            if self._script_params:
+                command_params[f'-script{self._pre}.param'] = '|'.join(
+                    self._script_params)
 
         return command_params
 
@@ -27,11 +34,11 @@ class ScriptDetails:
         assert isinstance(script_name, str)
         assert all([isinstance(param, str) for param in script_params])
 
-        self.__script_name = script_name
-        self.__script_params = list(script_params)
+        self._script_name = script_name
+        self._script_params = list(script_params)
 
 
-class ScriptsMixin:
+class ScriptMixin(base_command_module.BaseCommand0):
     """
     –script (Script) query parameter
 
@@ -40,16 +47,16 @@ class ScriptsMixin:
 
     def __init__(self, fms, layout_name):
         super().__init__(fms, layout_name)
-        self.__script_details = ScriptDetails('')
+        self._script_detail = ScriptDetail('')
 
     def get_command_params(self):
-        return self.__script_details.get_command_params(super().get_command_params())
+        return self._script_detail.get_command_params(super().get_command_params())
 
     def set_script(self, script_name, *script_params):
-        self.__script_details.add_script(script_name, *script_params)
+        self._script_detail.add_script(script_name, *script_params)
 
 
-class PreFindScriptsMixin:
+class PreFindScriptMixin(base_command_module.BaseCommand0):
     """
     –script.param (Pass parameter to Script) query parameter
 
@@ -58,16 +65,16 @@ class PreFindScriptsMixin:
 
     def __init__(self, fms, layout_name):
         super().__init__(fms, layout_name)
-        self.__script_details = ScriptDetails('.prefind')
+        self._prefind_script_detail = ScriptDetail('.prefind')
 
     def get_command_params(self):
-        return self.__script_details.get_command_params(super().get_command_params())
+        return self._prefind_script_detail.get_command_params(super().get_command_params())
 
     def set_prefind_script(self, script_name, *script_params):
-        self.__script_details.add_script(script_name, *script_params)
+        self._prefind_script_detail.add_script(script_name, *script_params)
 
 
-class PreSortScriptsMixin:
+class PreSortScriptMixin(base_command_module.BaseCommand0):
     """
     –script.presort (Script before Sort) query parameter
 
@@ -76,10 +83,10 @@ class PreSortScriptsMixin:
 
     def __init__(self, fms, layout_name):
         super().__init__(fms, layout_name)
-        self.__script_details = ScriptDetails('.presort')
+        self._pre_sort_script_detail = ScriptDetail('.presort')
 
     def get_command_params(self):
-        return self.__script_details.get_command_params(super().get_command_params())
+        return self._pre_sort_script_detail.get_command_params(super().get_command_params())
 
     def set_presort_script(self, script_name, *script_params):
-        self.__script_details.add_script(script_name, *script_params)
+        self._pre_sort_script_detail.add_script(script_name, *script_params)

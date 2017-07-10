@@ -1,8 +1,12 @@
-# -*- mode: python tab-width: 4 coding: utf-8 -*-
+#
+# coding: utf-8
+#
+# fmxml.parsers.grammar_base
+#
 from collections import namedtuple
 
 
-def elem_to_namedtuple(elem, tuple_class=None):
+def elem_to_namedtuple(elem, tuple_class):
     """
     Converts an etree elem leaf instance's items into a dictionary
     suitable for use initialising a namedtuple by replacing '-' with '_'

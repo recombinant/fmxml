@@ -1,4 +1,8 @@
-# -*- mode: python tab-width: 4 coding: utf-8 -*-
+#
+# coding: utf-8
+#
+# fmxml.commands.edit_command
+#
 from collections import namedtuple
 
 from .base_command import BaseCommand
@@ -12,45 +16,44 @@ class EditCommand(RecordIdMixin, BaseCommand):
     """
     -edit (Edit record) query command
     """
-    __slots__ = ('__modification_id', '__fqfn_list', '__delete_related',)
+    __slots__ = ('_modification_id', '_fqfn_list', '_delete_related',)
 
     def __init__(self, fms, layout_name, record_id=None, modification_id=None):
         assert modification_id is None or isinstance(modification_id, int)
 
         super().__init__(fms, layout_name)
 
-        self.__delete_related = None
-        self.__modification_id = None
-        self.__fqfn_list = []
+        self._delete_related = None
+        self._modification_id = None
+        self._fqfn_list = []
 
         # TODO: test if fqfn with record-id is Ok (record_id parameter not required?)
-        self.set_record_id(record_id)
-        self.set_modification_id(modification_id)
+        self.record_id = record_id  # property in RecordIdMixin
+        self.modification_id = modification_id
 
     def get_query(self):
         assert self.record_id is not None
         # need record_id for -delete.related
-        assert self.__delete_related is None or self.record_id is not None
+        assert self._delete_related is None or self.record_id is not None
 
         command_params = super().get_command_params()
 
-        if self.__modification_id is not None:
-            command_params['-modid'] = str(self.__modification_id)
+        if self._modification_id is not None:
+            command_params['-modid'] = str(self._modification_id)
 
-        if self.__delete_related is not None:
-            command_params['-delete.related'] = self.__delete_related
+        if self._delete_related is not None:
+            command_params['-delete.related'] = self._delete_related
 
-        for field in self.__fqfn_list:
+        for field in self._fqfn_list:
             command_params[field.fqfn] = field.value
 
         command_params['-edit'] = None
         return command_params.as_query()
 
-    @property
-    def modification_id(self):
-        return self.__modification_id
+    def _get_modification_id(self):
+        return self._modification_id
 
-    def set_modification_id(self, modification_id=None):
+    def _set_modification_id(self, modification_id=None):
         """
         –modid (Modification ID) query parameter
 
@@ -58,7 +61,9 @@ class EditCommand(RecordIdMixin, BaseCommand):
             modification_id (int, optional): A modification id. Defaults to None which means -modid omitted.
         """
         assert modification_id is None or (isinstance(modification_id, int) and modification_id > 0)
-        self.__modification_id = modification_id
+        self._modification_id = modification_id
+
+    modification_id = property(fget=_get_modification_id, fset=_set_modification_id)
 
     def set_delete_related(self, delete_related=None):
         """
@@ -68,7 +73,7 @@ class EditCommand(RecordIdMixin, BaseCommand):
             delete_related (str, optional): Portal record to delete
         """
         assert delete_related is None or isinstance(delete_related, str)
-        self.__delete_related = delete_related
+        self._delete_related = delete_related
 
     def add_edit_fqfn(self, fqfn, value):
         """
@@ -88,4 +93,4 @@ class EditCommand(RecordIdMixin, BaseCommand):
             fqfn (str): Fully qualified field name.
             value: Value of the field.
         """
-        self.__fqfn_list.append(EditField(fqfn, value))
+        self._fqfn_list.append(EditField(fqfn, value))

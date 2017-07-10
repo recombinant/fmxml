@@ -1,4 +1,8 @@
-# -*- mode: python tab-width: 4 coding: utf-8 -*-
+#
+# coding: utf-8
+#
+# fmxml.parsers.info_grammar
+#
 from collections import namedtuple
 from contextlib import closing
 from xml.etree.ElementTree import XMLPullParser
@@ -16,7 +20,7 @@ RawValue = namedtuple('RawValue', 'display text')
 
 
 class InfoGrammarParser(GrammarParserBase):
-    __slots__ = []
+    __slots__ = ()
 
     def parse(self, xml_bytes):
         assert xml_bytes
@@ -25,10 +29,10 @@ class InfoGrammarParser(GrammarParserBase):
         parser = XMLPullParser(['start', 'end', 'start-ns', 'end-ns'])  # ignore 'comment' & 'pi'
         with closing(parser) as parser:
             parser.feed(xml_bytes)
-            return self.__parser_read_events(parser)
+            return self._parser_read_events(parser)
 
     @staticmethod
-    def __parser_read_events(parser):
+    def _parser_read_events(parser):
         # the DTD can be found at, say:
         # http://localhost/fmi/xml/FMPXMLLAYOUT.dtd
         fmpxmllayout = None

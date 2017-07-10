@@ -1,20 +1,17 @@
 #!/usr/bin/env python3
-# -*- mode: python tab-width: 4 coding: utf-8 -*-
+# coding: utf-8
+#
+# test_parsers
+#
 """
-Just tests the commands and their generated URLs. Nothing goes out to the internet.
+Just tests the commands and their generated URLs. Nothing goes out to the
+over the network or internet.
 """
-
 import logging
 import urllib.parse
 
 import pytest
 
-from fmxml.fms import FMS_FIND_AND
-from fmxml.fms import \
-    FMS_FIND_OP_EQ, FMS_FIND_OP_NEQ, \
-    FMS_FIND_OP_GT, FMS_FIND_OP_CN, \
-    FMS_FIND_OP_BW, FMS_FIND_OP_EW
-from fmxml.fms import FMS_SORT_ASCEND, FMS_SORT_DESCEND
 from fmxml import FileMakerServer
 from fmxml.commands import DeleteCommand
 from fmxml.commands import DupCommand
@@ -23,7 +20,12 @@ from fmxml.commands import FindAnyCommand
 from fmxml.commands import FindCommand
 from fmxml.commands import FindQueryCommand, FindQuery, FindRequestDefinition
 from fmxml.commands import NewCommand
+from fmxml.fms import FMS_FIND_AND
+from fmxml.fms import (FMS_FIND_OP_EQ, FMS_FIND_OP_NEQ,
+                       FMS_FIND_OP_GT, FMS_FIND_OP_CN,
+                       FMS_FIND_OP_BW, FMS_FIND_OP_EW)
 from fmxml.fms import FMS_RELATEDSETS_FILTER_LAYOUT, FMS_RELATEDSETS_FILTER_NONE
+from fmxml.fms import FMS_SORT_ASCEND, FMS_SORT_DESCEND
 
 
 @pytest.fixture(name='fms')
@@ -32,7 +34,7 @@ def fixture_fms():
     # tested - so no requests need to be made to the server.
     logging.basicConfig(level=logging.DEBUG)
     fms_ = FileMakerServer(hostspec='http://localhost', username='username', password='password')
-    fms_.set_db_name('FMPHP_Sample')
+    fms_.db_name = 'FMPHP_Sample'
     return fms_
 
 
@@ -95,7 +97,7 @@ def test_03_find_command_skip(fms, layout_name):
 
 def test_04_find_command_recid(fms, layout_name):
     find_command = FindCommand(fms, layout_name)
-    find_command.set_record_id(7)
+    find_command.record_id = 7
     assert find_command.record_id == 7
 
     query = find_command.get_query()
@@ -103,7 +105,7 @@ def test_04_find_command_recid(fms, layout_name):
                     '-lay=Form View&' \
                     '-recid=7&' \
                     '-find'
-    find_command.set_record_id(None)
+    find_command.record_id = None
 
     query = find_command.get_query()
     assert query == '-db=FMPHP_Sample&' \
@@ -175,7 +177,7 @@ def test_05_find_command_sort_rule(fms, layout_name):
                     '-findall'
 
     # Add a record id to make sure it reverts to -find.
-    find_command.set_record_id(8)
+    find_command.record_id = 8
     query = find_command.get_query()
     assert query == '-db=FMPHP_Sample&' \
                     '-lay=Form View&' \
@@ -186,7 +188,7 @@ def test_05_find_command_sort_rule(fms, layout_name):
                     '-sortorder.3=descend&' \
                     '-find'
 
-    find_command.set_record_id(None)
+    find_command.record_id = None
     query = find_command.get_query()
     assert query == '-db=FMPHP_Sample&' \
                     '-lay=Form View&' \
@@ -264,9 +266,9 @@ def test_05_find_command_find_criteria(fms, layout_name):
 def test_07_edit_command(fms, layout_name):
     edit_command = EditCommand(fms, layout_name, record_id=12)
     assert edit_command.modification_id is None
-    edit_command.set_modification_id(2)
+    edit_command.modification_id = 2
     assert edit_command.modification_id == 2
-    edit_command.set_modification_id(3)
+    edit_command.modification_id = 3
     assert edit_command.modification_id == 3
     edit_command.add_edit_fqfn('Title', 'Unknown 24/7')
     query = edit_command.get_query()
@@ -321,7 +323,7 @@ def test_cwp_01():
     """
     logging.basicConfig(level=logging.DEBUG)
     fms_ = FileMakerServer(hostspec='http://localhost', username='username', password='password')
-    fms_.set_db_name('employees')
+    fms_.db_name = 'employees'
 
     find_command = FindCommand(fms_, 'departments')
     query = find_command.get_query()
@@ -401,7 +403,7 @@ def test_cwp_01():
                     '-delete'
 
     edit_command = EditCommand(fms_, 'departments', record_id=22)
-    edit_command.set_modification_id(6)
+    edit_command.modification_id = 6
     edit_command.add_edit_fqfn('last_name', 'Jones')
     query = edit_command.get_query()
     assert query == '-db=employees&' \
@@ -600,7 +602,7 @@ def test_cwp_01():
                     '-edit'
 
     find_command = FindCommand(fms_, 'family')
-    find_command.set_record_id(427)
+    find_command.record_id = 427
     query = find_command.get_query()
     assert query == '-db=employees&' \
                     '-lay=family&' \
@@ -664,7 +666,7 @@ def test_cwp_01():
 def test_cwp_02():
     logging.basicConfig(level=logging.DEBUG)
     fms_ = FileMakerServer(hostspec='http://localhost', username='username', password='password')
-    fms_.set_db_name('career')
+    fms_.db_name = 'career'
 
     edit_command = EditCommand(fms_, 'applications', record_id=7)
     edit_command.set_delete_related('jobtable.20')
@@ -679,7 +681,7 @@ def test_cwp_02():
 def test_cwp_03():
     logging.basicConfig(level=logging.DEBUG)
     fms_ = FileMakerServer(hostspec='http://localhost', username='username', password='password')
-    fms_.set_db_name('members')
+    fms_.db_name = 'members'
 
     # A non-ASCII character.
     edit_command = EditCommand(fms_, 'relationships', record_id=2)
@@ -701,7 +703,7 @@ def test_cwp_03():
 def test_cwp_04():
     logging.basicConfig(level=logging.DEBUG)
     fms_ = FileMakerServer(hostspec='http://localhost', username='username', password='password')
-    fms_.set_db_name('products')
+    fms_.db_name = 'products'
 
     find_command = FindCommand(fms_, 'sales')
     query = find_command.get_query()
@@ -713,7 +715,7 @@ def test_cwp_04():
 def test_cwp_05():
     logging.basicConfig(level=logging.DEBUG)
     fms_ = FileMakerServer(hostspec='http://localhost', username='username', password='password')
-    fms_.set_db_name('petclinic')
+    fms_.db_name = 'petclinic'
 
     find_query_command = FindQueryCommand(fms_, 'Patients')
     query1 = FindQuery('typeofanimal', 'Cat')
@@ -733,7 +735,7 @@ def test_cwp_05():
 def test_cwp_06():
     logging.basicConfig(level=logging.DEBUG)
     fms_ = FileMakerServer(hostspec='http://localhost', username='username', password='password')
-    fms_.set_db_name('vetclinic')
+    fms_.db_name = 'vetclinic'
 
     find_query_command = FindQueryCommand(fms_, 'animals')
     query1 = FindQuery('typeofanimal', 'Cat')
@@ -749,7 +751,6 @@ def test_cwp_06():
     query = find_query_command.get_query()
 
     assert query == '-db=vetclinic&-lay=animals&-query=(q1);(q2);!(q3)&-q1=typeofanimal&-q1.value=Cat&-q2=typeofanimal&-q2.value=Dog&-q3=name&-q3.value=Fluffy&-findquery'
-
 
 
     # TODO: assert query == '-db=employees&-lay=departments&-view'

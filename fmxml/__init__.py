@@ -1,4 +1,8 @@
-# -*- coding: utf-8 -*-
+#
+# coding: utf-8
+#
+# fmxml.__init__
+#
 import pkg_resources
 
 try:

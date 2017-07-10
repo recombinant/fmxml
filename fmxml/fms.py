@@ -1,11 +1,14 @@
-# -*- mode: python tab-width: 4 coding: utf-8 -*-
+#
+# coding: utf-8
+#
+# fmxml.fms
+#
 import logging
-
-# Logical operators for FindCommand
 from urllib.parse import urlsplit, SplitResult, urlunsplit
 
 import requests
 
+# Logical operators for FindCommand
 FMS_FIND_AND = 'and'
 FMS_FIND_OR = 'or'
 
@@ -31,60 +34,68 @@ FMS_RELATEDSETS_FILTER_NONE = 'none'
 
 
 class FileMakerServer:
-    __slots__ = ('__log', '__prop_lookup', '__requests_session', '__layout_names',
-                 '__hostspec', '__db_name', '__username', '__password',)
+    __slots__ = ('_log', '_prop_lookup', '_requests_session', '_layout_lookup',
+                 '_hostspec', '_db_name', '_username', '_password',)
 
     def __init__(self,
                  hostspec,  # e.g. http://localhost
                  username,
                  password,
                  db=None):
-        self.__log = logging.getLogger(__name__)
+        self._log = logging.getLogger(__name__)
         # self.log.info('FileMakerServer.__init__()')
-        self.__prop_lookup = {}
-        self.__layout_names = {}
-        self.__hostspec = self.__username = self.__password = self.__db_name = self.__requests_session = None
+        self._prop_lookup = {}
+        self._layout_lookup = {}
+        self._hostspec = None
+        self._username = None
+        self._password = None
+        self._db_name = None
+        self._requests_session = None
 
-        self.set_db_name(db or None)
-        self.set_hostspec(hostspec)
-        self.set_username(username)
-        self.set_password(password)
+        self.hostspec = hostspec
+        self.username = username
+        self.password = password
+        self.db_name = db or None
 
     def close(self):
-        if self.__requests_session is not None:
-            self.__requests_session.close()
+        if self._requests_session is not None:
+            self._requests_session.close()
 
     @property
     def log(self):
-        return self.__log
+        return self._log
 
-    @property
-    def db_name(self):
-        return self.__db_name
+    def _get_db_name(self):
+        return self._db_name
 
-    @property
-    def hostspec(self):
-        return self.__hostspec
+    def _set_db_name(self, db_name):
+        self._db_name = db_name
 
-    @property
-    def username(self):
-        return self.__username
+    db_name = property(fget=_get_db_name, fset=_set_db_name)
 
-    @property
-    def password(self):
-        return self.__password
+    def _get_hostspec(self):
+        return self._hostspec
 
-    def set_db_name(self, db_name):
-        self.__db_name = db_name
+    def _set_hostspec(self, hostspec):
+        self._hostspec = hostspec
 
-    def set_hostspec(self, hostspec):
-        self.__hostspec = hostspec
+    hostspec = property(fget=_get_hostspec, fset=_set_hostspec)
 
-    def set_username(self, username):
-        self.__username = username
+    def _get_username(self):
+        return self._username
 
-    def set_password(self, password):
-        self.__password = password
+    def _set_username(self, username):
+        self._username = username
+
+    username = property(fget=_get_username, fset=_set_username)
+
+    def _get_password(self):
+        return self._password
+
+    def _set_password(self, password):
+        self._password = password
+
+    password = property(fget=_get_password, fset=_set_password)
 
     def find_record_by_id(self, layout_name, record_id):
         assert isinstance(layout_name, str)
@@ -92,14 +103,14 @@ class FileMakerServer:
         assert record_id > 0
 
         command_object = self.create_find_records_command(layout_name)
-        command_object.set_record_id(record_id)
+        command_object.record_id = record_id
         command_result = command_object.execute()
 
         record_list = command_result.records
         if record_list:
             return record_list[0]
         else:
-            self.__log.info('Record "{}" not found in layout "{}".'.format(record_id, layout_name))
+            self._log.info('Record "{}" not found in layout "{}".'.format(record_id, layout_name))
             return None
 
     def create_dup_record_command(self, layout_name, record_id=None):
@@ -136,8 +147,8 @@ class FileMakerServer:
         from .commands import CommandContainer, Command
         from .parsers import DataGrammarParser
 
-        if layout_name in self.__layout_names:
-            return self.__layout_names[layout_name]
+        if layout_name in self._layout_lookup:
+            return self._layout_lookup[layout_name]
 
         command_params = [
             Command('-db', self.db_name),
@@ -146,14 +157,14 @@ class FileMakerServer:
         ]
         query = CommandContainer(*command_params).as_query()
 
-        xml_bytes = self.execute_(query)
+        xml_bytes = self.execute_query(query)
         assert xml_bytes
 
         parser = DataGrammarParser()
         parsed_data = parser.parse(xml_bytes)
         layout = Layout(self, parsed_data)
 
-        self.__layout_names[layout_name] = layout
+        self._layout_lookup[layout_name] = layout
         return layout
 
     def get_db_names(self):
@@ -161,7 +172,7 @@ class FileMakerServer:
         commands = [
             Command('-dbnames'),
         ]
-        return self.__get_names(commands)
+        return self._get_names(commands)
 
     def get_layout_names(self):
         from .commands import Command
@@ -169,7 +180,7 @@ class FileMakerServer:
             Command('-db', self.db_name),
             Command('-layoutnames'),
         ]
-        return self.__get_names(commands)
+        return self._get_names(commands)
 
     def get_script_names(self):
         from .commands import Command
@@ -177,15 +188,15 @@ class FileMakerServer:
             Command('-db', self.db_name),
             Command('-scriptnames'),
         ]
-        return self.__get_names(commands)
+        return self._get_names(commands)
 
-    def __get_names(self, commands):
+    def _get_names(self, commands):
         from .commands import CommandContainer
         from .parsers import DataGrammarParser
 
         query = CommandContainer(*commands).as_query()
 
-        xml_bytes = self.execute_(query)
+        xml_bytes = self.execute_query(query)
         assert xml_bytes
 
         parser = DataGrammarParser()
@@ -196,14 +207,11 @@ class FileMakerServer:
         names = filter(bool, names)
         return list(names)
 
-    def execute_(self, query, xml_grammar='fmresultset'):
+    def execute_query(self, query, xml_grammar='fmresultset'):
         """
         Args:
-            query (str): Query part of url created elsewhere.
-            xml_grammar (str): One of the available XML grammars.
-
-        Returns:
-            bytes: XML result.
+            query: Query part of url created elsewhere. 
+            xml_grammar: One of the available XML grammars. 
         """
         assert query
         assert isinstance(query, str)
@@ -218,7 +226,7 @@ class FileMakerServer:
         # Join together (correctly) for xml_url.
         xml_url = urlunsplit(sr)
 
-        self.__log.info(xml_url)
+        self._log.info(xml_url)
 
         resp = self.requests_session.get(url=xml_url, auth=(self.username, self.password))
         resp.raise_for_status()  # promulgate errors from the bowels of requests
@@ -234,17 +242,16 @@ class FileMakerServer:
           request.Session: Session object. Makes repeat connects much
             faster.
         """
-        # dunder __requests_session is a variable. This is a function
+        # dunder _requests_session is a variable. This is a function
         # that uses that variable.
 
-        if self.__requests_session is None:
-            self.__requests_session = requests.Session()
+        if self._requests_session is None:
+            self._requests_session = requests.Session()
             # The username/password relates to this instance.
             if self.username:
-                self.__requests_session.auth = \
-                    (self.username, self.password)
+                self._requests_session.auth = (self.username, self.password)
 
-        return self.__requests_session
+        return self._requests_session
 
     def get_container_data_url(self, url_path):
         """
@@ -261,15 +268,11 @@ class FileMakerServer:
         # ----------------------------------------------------- reconstruct url
         sr1 = urlsplit(hostspec)
         sr2 = urlsplit(url_path)
-        sr = SplitResult(scheme=sr1.scheme,
-                         netloc=sr1.netloc,
-                         path=sr2.path,
-                         query=sr2.query,
-                         fragment='')
+        sr = SplitResult(scheme=sr1.scheme, netloc=sr1.netloc, path=sr2.path, query=sr2.query, fragment='')
         # Join together (correctly) for container_url.
         container_url = urlunsplit(sr)
 
-        self.__log.info(container_url)
+        self._log.info(container_url)
         # ---------------------------------------------------------------------
         return container_url
 

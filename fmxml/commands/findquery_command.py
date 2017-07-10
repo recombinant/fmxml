@@ -1,9 +1,13 @@
-# -*- mode: python tab-width: 4 coding: utf-8 -*-
+#
+# coding: utf-8
+#
+# fmxml.commands.findquery_command
+#
 from collections import namedtuple, OrderedDict
 
 from .base_command import BaseCommand
-from .mixins import SortRulesMixin, FoundSetMixin, \
-    ScriptsMixin, PreFindScriptsMixin, PreSortScriptsMixin
+from .mixins import (SortRulesMixin, FoundSetMixin, ScriptMixin,
+                     PreFindScriptMixin, PreSortScriptMixin)
 
 FindQuery = namedtuple('FindQuery', 'field_name test_value')
 
@@ -20,33 +24,33 @@ class FindRequestDefinition:
 
 class FindQueryCommand(FoundSetMixin,
                        SortRulesMixin,
-                       ScriptsMixin,
-                       PreFindScriptsMixin,
-                       PreSortScriptsMixin,
+                       ScriptMixin,
+                       PreFindScriptMixin,
+                       PreSortScriptMixin,
                        BaseCommand):
-    __slots__ = ('__request_definitions',)
+    __slots__ = ('_request_definitions',)
 
     def __init__(self, fms, layout_name):
         super().__init__(fms, layout_name)
 
-        self.__request_definitions = []
+        self._request_definitions = []
 
     def add_request_definitions(self, request_definition1, request_definition2, *args):
-        assert not self.__request_definitions
+        assert not self._request_definitions
         assert isinstance(request_definition1, FindRequestDefinition)
         assert isinstance(request_definition2, FindRequestDefinition)
         assert all([isinstance(request, FindRequestDefinition) for request in args])
 
-        self.__request_definitions.append(request_definition1)
-        self.__request_definitions.append(request_definition2)
+        self._request_definitions.append(request_definition1)
+        self._request_definitions.append(request_definition2)
         for request_definition in args:
-            self.__request_definitions.append(request_definition)
+            self._request_definitions.append(request_definition)
 
     def get_query(self):
         """
         Returns the URL query. Nothing to do with the FindQuery's query logic.
         """
-        assert self.__request_definitions
+        assert self._request_definitions
         command_params = super().get_command_params()
 
         query_id = 1
@@ -56,7 +60,7 @@ class FindQueryCommand(FoundSetMixin,
         # For adding to command_params.
         params = OrderedDict()
 
-        for rd in self.__request_definitions:
+        for rd in self._request_definitions:
             query_list = []  # list of qN for this request
 
             for field_name, test_value in rd.queries:

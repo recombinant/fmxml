@@ -1,21 +1,27 @@
-# -*- mode: python tab-width: 4 coding: utf-8 -*-
+#
+# coding: utf-8
+#
+# fmxml.commands.mixins.sort_rules_mixin
+#
 from collections import namedtuple, OrderedDict
+
+from .. import base_command as base_command_module
 
 SortOrder = namedtuple('SortOrder', 'precedence order')
 
 
-class SortRulesMixin:
+class SortRulesMixin(base_command_module.BaseCommand0):
     def __init__(self, fms, layout_name):
         super().__init__(fms, layout_name)
-        self.__sort_fields = OrderedDict()
+        self._sort_fields = OrderedDict()
 
     def get_command_params(self):
         command_params = super().get_command_params()
 
         sort_precedence = {}
-        for field_name in self.__sort_fields:
-            precedence = self.__sort_fields[field_name].precedence
-            order = self.__sort_fields[field_name].order
+        for field_name in self._sort_fields:
+            precedence = self._sort_fields[field_name].precedence
+            order = self._sort_fields[field_name].order
             sort_precedence[precedence] = (field_name, order)
         for precedence in sorted(list(sort_precedence)):
             field_name, order = sort_precedence[precedence]
@@ -43,12 +49,12 @@ class SortRulesMixin:
 
         # Remove anything with the same precedence.
         # Maximum of 9 items, so brute force is Ok.
-        for tmp_field_name in list(self.__sort_fields.keys()):
-            if self.__sort_fields[tmp_field_name].precedence == precedence:
-                del self.__sort_fields[tmp_field_name]
+        for tmp_field_name in list(self._sort_fields.keys()):
+            if self._sort_fields[tmp_field_name].precedence == precedence:
+                del self._sort_fields[tmp_field_name]
 
-        self.__sort_fields[field_name] = SortOrder(precedence, order)
-        self.__sort_fields.move_to_end(field_name)  # LIFO
+        self._sort_fields[field_name] = SortOrder(precedence, order)
+        self._sort_fields.move_to_end(field_name)  # LIFO
 
     def del_sort_rule(self, field_name):
         """
@@ -57,11 +63,11 @@ class SortRulesMixin:
         Args:
             field_name (str): Name of field to be removed.
         """
-        if field_name in self.__sort_fields:
-            del self.__sort_fields[field_name]
+        if field_name in self._sort_fields:
+            del self._sort_fields[field_name]
 
     def clear_sort_rules(self):
         """
         Remove any rules set by :py:member:`add_sort_rule`
         """
-        self.__sort_fields.clear()
+        self._sort_fields.clear()

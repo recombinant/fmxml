@@ -1,6 +1,11 @@
-# -*- mode: python tab-width: 4 coding: utf-8 -*-
+#
+# coding: utf-8
+#
+# fmxml.parsers.data_grammar2
+#
 from collections import namedtuple
 from contextlib import closing
+from typing import List, NamedTuple
 from xml.etree.ElementTree import XMLPullParser
 
 from .grammar_base import ElemInitialiser
@@ -8,16 +13,22 @@ from .grammar_base import GrammarParserBase
 from .grammar_base import RawProduct
 from .grammar_base import elem_to_namedtuple
 
-RawFMPXMLResult = namedtuple('RawFMPXMLResult', 'errorcode product database fields resultset')
-RawDatabase = namedtuple('RawDatabase', 'name records dateformat timeformat layout')
-RawResultset = namedtuple('RawResultset', 'found rows')
-RawRow = namedtuple('RawRow', 'modid recordid cols')
-RawCol = namedtuple('RawCol', 'data')
+RawDatabase = namedtuple('RawDatabase', ['name', 'records', 'dateformat', 'timeformat', 'layout', ])
+RawResultset = namedtuple('RawResultset', ['found', 'rows', ])
+RawRow = namedtuple('RawRow', ['modid', 'recordid', 'cols', ])
+RawCol = namedtuple('RawCol', ['data', ])
+
+RawFMPXMLResult = NamedTuple('RawFMPXMLResult',
+                             [('errorcode', str),
+                              ('product', str),
+                              ('database', RawDatabase),
+                              ('fields', List[str]),
+                              ('resultset', RawResultset), ])
 
 
 class RawFieldDefinition(ElemInitialiser):
     # 'type' won't work as a field in namedtuple
-    __slots__ = ['emptyok', 'maxrepeat', 'name', 'type']
+    __slots__ = ('emptyok', 'maxrepeat', 'name', 'type',)
 
 
 class DataGrammar2Parser(GrammarParserBase):
@@ -30,7 +41,7 @@ class DataGrammar2Parser(GrammarParserBase):
     The DTD can be found at, say:
         https://localhost/fmi/xml/FMPXMLRESULT.dtd
     """
-    __slots__ = []
+    __slots__ = ()
 
     def parse(self, xml_bytes):
         """
@@ -49,10 +60,10 @@ class DataGrammar2Parser(GrammarParserBase):
 
         with closing(parser) as parser:
             parser.feed(xml_bytes)
-            return self.__parser_read_events(parser)
+            return self._parser_read_events(parser)
 
     @staticmethod
-    def __parser_read_events(parser):
+    def _parser_read_events(parser):
         fmpxmlresult = None
         ns = ''  # For removal of element tag namespace.
         nsl = 0  # Length of ns

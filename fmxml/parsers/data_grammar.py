@@ -1,4 +1,8 @@
-# -*- mode: python tab-width: 4 coding: utf-8 -*-
+#
+# coding: utf-8
+#
+# fmxml.parsers.data_grammar
+#
 from collections import defaultdict, namedtuple
 from contextlib import closing
 from xml.etree.ElementTree import XMLPullParser
@@ -10,8 +14,8 @@ from .grammar_base import elem_to_namedtuple
 
 
 class RawFMResultSet(ElemInitialiser):
-    __slots__ = ['version', 'xmlns', 'error', 'product', 'datasource', 'resultset',
-                 'field_definitions', 'relatedset_definitions']
+    __slots__ = ('version', 'xmlns', 'error', 'product', 'datasource', 'resultset',
+                 'field_definitions', 'relatedset_definitions',)
 
     def __init__(self, elem):
         super().__init__(elem)
@@ -30,8 +34,11 @@ RawDataSource = namedtuple(
 
 
 class RawFieldDefinition(ElemInitialiser):
-    __slots__ = ['auto_enter', 'four_digit_year', 'global', 'max_repeat', 'name', 'not_empty',
-                 'numeric_only', 'max_characters', 'result', 'time_of_day', 'type']
+    # __slots is important.
+    # It is used in fmxml.structure.field_definition.FieldDefinition
+    __slots__ = ('auto_enter', 'four_digit_year', 'global', 'max_repeat',
+                 'name', 'not_empty', 'numeric_only', 'max_characters',
+                 'result', 'time_of_day', 'type',)
 
     def __init__(self, elem):
         super().__init__(elem)
@@ -41,7 +48,7 @@ class RawFieldDefinition(ElemInitialiser):
 
 
 class RawResultSet(ElemInitialiser):
-    __slots__ = ['count', 'fetch_size', 'records']
+    __slots__ = ('count', 'fetch_size', 'records',)
 
     def __init__(self, elem):
         super().__init__(elem)
@@ -49,7 +56,7 @@ class RawResultSet(ElemInitialiser):
 
 
 class RawRecord(ElemInitialiser):
-    __slots__ = ['record_id', 'modification_id', 'fields', 'relatedsets']
+    __slots__ = ('record_id', 'modification_id', 'fields', 'relatedsets',)
 
     def __init__(self, elem):
         super().__init__(elem)
@@ -60,7 +67,7 @@ class RawRecord(ElemInitialiser):
 
 
 class RawField(ElemInitialiser):
-    __slots__ = ['name', 'data']
+    __slots__ = ('name', 'data',)
 
     def __init__(self, elem):
         super().__init__(elem)
@@ -77,7 +84,7 @@ class DataGrammarParser(GrammarParserBase):
     The DTD can be found at, say:
         https://localhost/fmi/xml/fmresultset.dtd
     """
-    __slots__ = []
+    __slots__ = ()
 
     def parse(self, xml_bytes):
         """
@@ -96,11 +103,13 @@ class DataGrammarParser(GrammarParserBase):
 
         with closing(parser) as parser:
             parser.feed(xml_bytes)
-            return self.__parser_read_events(parser)
+            return self._parser_read_events(parser)
 
     @staticmethod
-    def __parser_read_events(parser):
-        table_name = parent_raw_record = current_raw_record = None
+    def _parser_read_events(parser):
+        table_name = None  # type: str
+        parent_raw_record = None  # type: RawRecord
+        current_raw_record = None  # type: RawRecord
 
         ns = ''  # For removal of element tag namespace.
         nsl = 0  # Length of ns
