@@ -71,7 +71,7 @@ class DataGrammar2Parser(GrammarParserBase):
         for event, elem in parser.read_events():
             if event == 'start-ns':
                 # elem == (prefix, namespaceURI)
-                ns = '{{{}}}'.format(elem[1])
+                ns = f'{{{elem[1]}}}'
                 nsl = len(ns)
                 continue
 

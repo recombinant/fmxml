@@ -51,5 +51,5 @@ class NewCommand(BaseCommand):
         if isinstance(value, datetime.date):
             value = value.strftime('%m/%d/%Y')
 
-        fqfn = '{}({})'.format(field_name, repetition_number)
+        fqfn = f'{field_name}({repetition_number})'
         self.add_new_fqfn(fqfn, value)

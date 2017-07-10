@@ -25,9 +25,9 @@ class SortRulesMixin(base_command_module.BaseCommand0):
             sort_precedence[precedence] = (field_name, order)
         for precedence in sorted(list(sort_precedence)):
             field_name, order = sort_precedence[precedence]
-            command_params['-sortfield.{}'.format(precedence)] = field_name
+            command_params[f'-sortfield.{precedence}'] = field_name
             if order is not None:
-                command_params['-sortorder.{}'.format(precedence)] = order
+                command_params[f'-sortorder.{precedence}'] = order
 
         return command_params
 

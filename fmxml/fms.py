@@ -110,7 +110,7 @@ class FileMakerServer:
         if record_list:
             return record_list[0]
         else:
-            self._log.info('Record "{}" not found in layout "{}".'.format(record_id, layout_name))
+            self._log.info(f'Record "{record_id}" not found in layout "{layout_name}".')
             return None
 
     def create_dup_record_command(self, layout_name, record_id=None):
@@ -218,7 +218,7 @@ class FileMakerServer:
         assert xml_grammar
         assert isinstance(xml_grammar, str)
 
-        path = '/fmi/xml/{}.xml'.format(xml_grammar)
+        path = f'/fmi/xml/{xml_grammar}.xml'
         hostspec = self.hostspec
 
         sr = urlsplit(hostspec)

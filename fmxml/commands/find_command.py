@@ -60,7 +60,7 @@ class FindCommand(SortRulesMixin,
                     FMS_FIND_OP_BW, FMS_FIND_OP_EW,
                     FMS_FIND_OP_CN,
                 }
-                param = '{}.op'.format(field_name)
+                param = f'{field_name}.op'
                 command_params[param] = op
 
         # self.record_id is a property in RecordIdMixin

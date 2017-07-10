@@ -64,15 +64,15 @@ class FindQueryCommand(FoundSetMixin,
             query_list = []  # list of qN for this request
 
             for field_name, test_value in rd.queries:
-                params['-q{}'.format(query_id)] = field_name
-                params['-q{}.value'.format(query_id)] = test_value
-                query_list.append('q{}'.format(query_id))
+                params[f'-q{query_id}'] = field_name
+                params[f'-q{query_id}.value'] = test_value
+                query_list.append(f'q{query_id}')
                 query_id += 1
 
             exclamation = '!' if rd.omit else ''
             query_string = ','.join(query_list)  # e.g. q1,q2
             # e.g. !(q1,q2)
-            request_string = '{}({})'.format(exclamation, query_string)
+            request_string = f'{exclamation}({query_string})'
             request_list.append(request_string)
 
         request_declaration = ';'.join(request_list)

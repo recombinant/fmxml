@@ -126,8 +126,9 @@ class FieldDefinition:
                     return Decimal(value)
                 except decimal.InvalidOperation:
                     pass
-            self.layout.fms.log.warning('Unexpected NUMBER value for field: {}, {!r}'
-                                        .format(self._field_name, value))
+            self.layout.fms.log.warning(
+                f'Unexpected NUMBER value for field: '
+                f'{self._field_name}, {value!r}')
             return value
         elif self._result == RESULT_DATE:  # ---------------------------------
             assert not self._time_of_day
@@ -141,8 +142,9 @@ class FieldDefinition:
                     return datetime.datetime.strptime(value, '%m/%d/%Y').date()
                 except ValueError:
                     pass
-            self.layout.fms.log.warning('Unexpected DATE value for field: {}, {!r}'
-                                        .format(self._field_name, value))
+            self.layout.fms.log.warning(
+                f'Unexpected DATE value for field: '
+                f'{self._field_name}, {value!r}')
             return value
         elif self._result == RESULT_TIME:  # ---------------------------------
             assert self._layout.time_format == 'HH:mm:ss'
@@ -153,8 +155,9 @@ class FieldDefinition:
                     return datetime.datetime.strptime(value, '%H:%M:%S').time()
                 except ValueError:
                     pass
-            self.layout.fms.log.warning('Unexpected TIME value for field: {}, {!r}'
-                                        .format(self._field_name, value))
+            self.layout.fms.log.warning(
+                f'Unexpected TIME value for field: '
+                f'{self._field_name}, {value!r}')
             return value
         elif self._result == RESULT_TIMESTAMP:  # ----------------------------
             assert self._layout.timestamp_format == 'MM/dd/yyyy HH:mm:ss'
@@ -165,8 +168,9 @@ class FieldDefinition:
                     return datetime.datetime.strptime(value, '%m/%d/%Y %H:%M:%S')
                 except ValueError:
                     pass
-            self.layout.fms.log.warning('Unexpected TIMESTAMP value for field: {}, {!r}'
-                                        .format(self._field_name, value))
+            self.layout.fms.log.warning(
+                f'Unexpected TIMESTAMP value for field: '
+                f'{self._field_name}, {value!r}')
             return value
 
     def set_valuelist_name_(self, valuelist_name):

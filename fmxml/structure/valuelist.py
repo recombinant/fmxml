@@ -32,7 +32,7 @@ class Valuelist(collections.abc.Sequence):
         # this is good estimate at the type of value list
         if all(raw_value.display == raw_value.text for raw_value in raw_values):
             self._type = ValuelistDisplayEnum.VALUELIST_FIRST
-        elif all(raw_value.display.startswith('{} '.format(raw_value.text))
+        elif all(raw_value.display.startswith(f'{raw_value.text} ')
                  for raw_value in raw_values):
             self._type = ValuelistDisplayEnum.VALUELIST_BOTH
         else:
@@ -57,9 +57,7 @@ class Valuelist(collections.abc.Sequence):
         return iter(self._valuelist)
 
     def __repr__(self):
-        return 'Valuelist(name={}, valuelist={})' \
-            .format(repr(self._name),
-                    repr(self._valuelist))
+        return f'Valuelist(name={self._name!r}, valuelist={self._valuelist!r})'
 
     # The following do not make any sense in the context of a value list.
     def __contains__(self, item):
