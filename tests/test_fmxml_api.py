@@ -1,12 +1,12 @@
 # -*- mode: python tab-width: 4 coding: utf-8 -*-
 import logging
+import random
 from collections import OrderedDict
 from io import BytesIO
 from urllib.parse import urlsplit
 
 import pytest
 from PIL import Image
-import random
 
 from fmxml.commands import NewCommand
 from fmxml.fms import FileMakerServer
@@ -125,7 +125,7 @@ def test_05_dup_delete1(fms, layout_name):
             assert any(item.display == value for item in valuelist)
 
         if record.record_id > 12:
-            del_command.set_record_id(record.record_id)
+            del_command.record_id = record.record_id
             del_result = del_command.execute()
             total_count -= 1
             assert total_count == del_result.total_count

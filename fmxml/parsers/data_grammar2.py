@@ -5,7 +5,6 @@
 #
 from collections import namedtuple
 from contextlib import closing
-from typing import List, NamedTuple
 from xml.etree.ElementTree import XMLPullParser
 
 from .grammar_base import ElemInitialiser
@@ -18,12 +17,8 @@ RawResultset = namedtuple('RawResultset', ['found', 'rows', ])
 RawRow = namedtuple('RawRow', ['modid', 'recordid', 'cols', ])
 RawCol = namedtuple('RawCol', ['data', ])
 
-RawFMPXMLResult = NamedTuple('RawFMPXMLResult',
-                             [('errorcode', str),
-                              ('product', str),
-                              ('database', RawDatabase),
-                              ('fields', List[str]),
-                              ('resultset', RawResultset), ])
+RawFMPXMLResult = namedtuple('RawFMPXMLResult',
+                             ['errorcode', 'product', 'database', 'fields', 'resultset', ])
 
 
 class RawFieldDefinition(ElemInitialiser):

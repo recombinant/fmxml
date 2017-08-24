@@ -17,13 +17,14 @@ import pytest
 
 from fmxml.commands.command_container import SAFE_CHARS
 from fmxml.commands.findquery_command import FindQuery, FindRequestDefinition
-from fmxml.fms import FileMakerServer, FMS_SORT_ASCEND, FMS_FIND_OP_EW, FMS_FIND_OP_BW, \
-    FMS_FIND_OP_CN, FMS_FIND_OP_EQ, FMS_FIND_OP_NEQ, FMS_SORT_DESCEND, FMS_FIND_OR
+from fmxml.fms import (FileMakerServer, FMS_SORT_ASCEND, FMS_FIND_OP_EW,
+                       FMS_FIND_OP_BW, FMS_FIND_OP_CN, FMS_FIND_OP_EQ,
+                       FMS_FIND_OP_NEQ, FMS_SORT_DESCEND, FMS_FIND_OR)
 from fmxml.structure import Record
 from tests import secret
 
 
-def _execute(self, query, xml_grammar='fmresultset'):
+def execute_query(self, query, xml_grammar='fmresultset'):
     """
     Monkey patch.
     Replacement function for FileMakerServer. Caches +execute() responses.
@@ -91,7 +92,7 @@ def _execute(self, query, xml_grammar='fmresultset'):
 @pytest.fixture(name='fms_cached')
 def fixture_fms_cached():
     connection = secret.get_connection('fmphp_sample')
-    setattr(FileMakerServer, '_execute', _execute)  # Monkey patch.
+    setattr(FileMakerServer, 'execute_query', execute_query)  # Monkey patch.
     logging.basicConfig(level=logging.INFO)
     fms_ = FileMakerServer(**connection)
     return fms_
@@ -102,7 +103,7 @@ def fixture_layout_name():
     return 'Form View'
 
 
-def test_01_dbnames(fms_cached):
+def test_01_dbnames(fms_cached: FileMakerServer):
     db_names = fms_cached.get_db_names()
 
     assert db_names
@@ -111,7 +112,7 @@ def test_01_dbnames(fms_cached):
     assert 'FMPHP_Sample' in db_names
 
 
-def test_02_layout_names(fms_cached):
+def test_02_layout_names(fms_cached: FileMakerServer):
     layout_names = fms_cached.get_layout_names()
 
     assert isinstance(layout_names, list)
@@ -121,7 +122,7 @@ def test_02_layout_names(fms_cached):
     assert 'Form View' in layout_names
 
 
-def test_03_script_names(fms_cached):
+def test_03_script_names(fms_cached: FileMakerServer):
     script_names = fms_cached.get_script_names()
 
     assert isinstance(script_names, list)
@@ -134,7 +135,7 @@ def test_03_script_names(fms_cached):
     assert script_name_subset.issubset(set(script_names))
 
 
-def test_04_records(fms_cached, layout_name):
+def test_04_records(fms_cached: FileMakerServer, layout_name: str):
     # Get all the records, there should not be many.
 
     find_command = fms_cached.create_find_records_command(layout_name)
@@ -170,17 +171,17 @@ def test_04_records(fms_cached, layout_name):
         assert record.record_id == record2.record_id
 
 
-def test_05_layout(fms_cached, layout_name):
+def test_05_layout(fms_cached: FileMakerServer, layout_name: str):
     layout = fms_cached.get_layout(layout_name)
-    assert layout.database_name == fms_cached.db_name
+    assert layout.database_name == fms_cached.db_name()
     assert layout.name == layout_name
 
     layout = fms_cached.get_layout(layout_name)
-    assert layout.database_name == fms_cached.db_name
+    assert layout.database_name == fms_cached.db_name()
     assert layout.name == layout_name
 
 
-def test_09_sort1(fms_cached, layout_name):
+def test_09_sort1(fms_cached: FileMakerServer, layout_name: str):
     # sort by title
     find_command = fms_cached.create_find_records_command(layout_name)
     find_command.add_sort_rule('Title', 1, FMS_SORT_ASCEND)
@@ -215,7 +216,7 @@ def test_09_sort1(fms_cached, layout_name):
                 records2[idx].get_field_value(field_name)
 
 
-def test_10_findquery(fms_cached, layout_name):
+def test_10_findquery(fms_cached: FileMakerServer, layout_name: str):
     findquery_command = fms_cached.create_findquery_command(layout_name)
 
     # Specify search criterion for first find request
@@ -248,7 +249,7 @@ def test_10_findquery(fms_cached, layout_name):
     assert records
 
 
-def test_11_find(fms_cached, layout_name):
+def test_11_find(fms_cached: FileMakerServer, layout_name: str):
     find_command = fms_cached.create_find_records_command(layout_name)
     find_command.add_find_criterion('Title', 'Pennsylvania 24/7')
     command_result = find_command.execute()
@@ -283,7 +284,7 @@ def test_11_find(fms_cached, layout_name):
     assert record_id_set == {record.record_id for record in command_result.records}
 
 
-def test_12_findany(fms_cached, layout_name):
+def test_12_findany(fms_cached: FileMakerServer, layout_name: str):
     command = fms_cached.create_findany_record_command(layout_name)
     command_result = command.execute()
 
@@ -291,7 +292,7 @@ def test_12_findany(fms_cached, layout_name):
     assert command_result.fetch_size == 1
 
 
-def test_13_find_op_neq(fms_cached, layout_name):
+def test_13_find_op_neq(fms_cached: FileMakerServer, layout_name: str):
     command = fms_cached.create_find_records_command(layout_name)
     command.add_find_criterion('Title', 'New York 24/7', op=FMS_FIND_OP_NEQ)
     command_result = command.execute()
@@ -309,7 +310,7 @@ def test_13_find_op_neq(fms_cached, layout_name):
     # assert record_id_set == {record.record_id for record in command_result.records}
 
 
-def test_14_find_op_eq(fms_cached, layout_name):
+def test_14_find_op_eq(fms_cached: FileMakerServer, layout_name: str):
     command = fms_cached.create_find_records_command(layout_name)
     command.add_find_criterion('Title', 'New York 24/7', op=FMS_FIND_OP_EQ)
     command_result = command.execute()
@@ -326,7 +327,7 @@ def test_14_find_op_eq(fms_cached, layout_name):
     assert record_id_set == {record.record_id for record in command_result.records}
 
 
-def test_15_find_op_cn(fms_cached, layout_name):
+def test_15_find_op_cn(fms_cached: FileMakerServer, layout_name: str):
     command = fms_cached.create_find_records_command(layout_name)
     # Test contains 'as'
     command.add_find_criterion('Title', 'as', op=FMS_FIND_OP_CN)
@@ -345,7 +346,7 @@ def test_15_find_op_cn(fms_cached, layout_name):
     assert record_id_set == {record.record_id for record in command_result.records}
 
 
-def test_16_find_op_cn(fms_cached, layout_name):
+def test_16_find_op_cn(fms_cached: FileMakerServer, layout_name: str):
     command = fms_cached.create_find_records_command(layout_name)
     # Test begins with 'bw'
     command.add_find_criterion('Title', 'C', op=FMS_FIND_OP_BW)
@@ -355,7 +356,7 @@ def test_16_find_op_cn(fms_cached, layout_name):
     assert command_result.fetch_size == 2
 
 
-def test_17_find_op_ew(fms_cached, layout_name):
+def test_17_find_op_ew(fms_cached: FileMakerServer, layout_name: str):
     command = fms_cached.create_find_records_command(layout_name)
     # Test ends with 'ew'
     command.add_find_criterion('Title', 'a 24/7', op=FMS_FIND_OP_EW)
@@ -378,7 +379,7 @@ def test_17_find_op_ew(fms_cached, layout_name):
     assert record_id_set == {record.record_id for record in command_result.records}
 
 
-def test_18_skip(fms_cached, layout_name):
+def test_18_skip(fms_cached: FileMakerServer, layout_name: str):
     command = fms_cached.create_find_records_command(layout_name)
     command.add_sort_rule('Title', 1, FMS_SORT_ASCEND)
     command.set_skip(skip=5)
@@ -395,7 +396,7 @@ def test_18_skip(fms_cached, layout_name):
     assert expected == found
 
 
-def test_19_max(fms_cached, layout_name):
+def test_19_max(fms_cached: FileMakerServer, layout_name: str):
     command = fms_cached.create_find_records_command(layout_name)
     command.add_sort_rule('Title', 1, FMS_SORT_ASCEND)
     command.set_max(max_=3)
@@ -411,7 +412,7 @@ def test_19_max(fms_cached, layout_name):
     assert expected == found
 
 
-def test_20_skip_max(fms_cached, layout_name):
+def test_20_skip_max(fms_cached: FileMakerServer, layout_name: str):
     command = fms_cached.create_find_records_command(layout_name)
     command.add_sort_rule('Title', 1, FMS_SORT_ASCEND)
     command.set_skip(skip=5)
@@ -429,7 +430,7 @@ def test_20_skip_max(fms_cached, layout_name):
     assert expected == found
 
 
-def test_21_findall(fms_cached, layout_name):
+def test_21_findall(fms_cached: FileMakerServer, layout_name: str):
     findall_command = fms_cached.create_find_records_command(layout_name)
     command_result = findall_command.execute()
 

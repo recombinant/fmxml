@@ -83,8 +83,8 @@ def _get_info_grammar_from_file(xml_path):
         # Need to check for overly long file names.
         if not xml_path.startswith('\\\\?\\') and len(xml_path) > 260:
             if not re.match(r'^[a-z]:\\', xml_path, re.I):
-                raise AssertionError('path length too long: {!r}'.format(xml_path))
-            xml_path = r'\\?\{}'.format(xml_path)
+                raise AssertionError(f'path length too long: {xml_path!r}')
+            xml_path = fr'\\?\{xml_path}'
 
     xml_bytes = open(xml_path, 'rb').read()
     parser = InfoGrammarParser()
@@ -100,8 +100,8 @@ def _get_data_grammar_from_file(xml_path):
         # Need to check for overly long file names.
         if not xml_path.startswith('\\\\?\\') and len(xml_path) > 260:
             if not re.match(r'^[a-z]:\\', xml_path, re.I):
-                raise AssertionError('path length too long: {!r}'.format(xml_path))
-            xml_path = r'\\?\{}'.format(xml_path)
+                raise AssertionError(f'path length too long: {xml_path!r}')
+            xml_path = fr'\\?\{xml_path}'
 
     xml_bytes = open(xml_path, 'rb').read()
     parser = DataGrammarParser()

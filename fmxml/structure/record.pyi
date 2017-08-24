@@ -8,7 +8,6 @@ from typing import List, Any, Optional, Dict
 from . import field_container as field_container_module
 from . import layout as layout_module
 from . import portal as portal_module
-from . import record as record_module
 from .. import fms as fms_module
 
 
@@ -58,7 +57,7 @@ class Record:
 
     def add_portal_record_(self,
                            table_name: str,
-                           portal_record: record_module.Record) \
+                           portal_record: Record) \
             -> None:
         ...
 
