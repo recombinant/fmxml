@@ -15,6 +15,7 @@ class BaseCommand0(abc.ABC):
         """
         Pass in the FileMakerServer instance and the name of the Layer.
         """
+        pass
 
     def get_command_params(self):
         """

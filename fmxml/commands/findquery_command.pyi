@@ -18,12 +18,12 @@ class FindQuery(NamedTuple):
 
 
 class FindRequestDefinition:
-    queries: List[FindQuery] = ...
-    omit: bool = ...
+    queries: List[FindQuery]
+    omit: bool
 
     def __init__(self,
                  queries: List[FindQuery],
-                 omit: bool = ...) \
+                 omit: bool = False) \
             -> None:
         ...
 
@@ -34,7 +34,7 @@ class FindQueryCommand(foundset_mixin_module.FoundSetMixin,
                        script_mixin_module.PreFindScriptMixin,
                        script_mixin_module.PreSortScriptMixin,
                        base_command_module.BaseCommand):
-    _request_definitions: List[FindRequestDefinition] = ...
+    _request_definitions: List[FindRequestDefinition]
 
     def __init__(self,
                  fms: fms_module.FileMakerServer,

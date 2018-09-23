@@ -15,7 +15,7 @@ class DupCommand(record_id_mixin_module.RecordIdMixin,
     def __init__(self,
                  fms: fms_module.FileMakerServer,
                  layout_name: str,
-                 record_id: Optional[int] = ...) \
+                 record_id: Optional[int] = None) \
             -> None:
         ...
 

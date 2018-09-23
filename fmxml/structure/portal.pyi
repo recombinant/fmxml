@@ -11,10 +11,10 @@ from .. import fms as fms_module
 
 
 class Portal:
-    _fms: fms_module.FileMakerServer = ...
-    _layout: layout_module.Layout = ...
-    _table_name: str = ...
-    _field_definition_lookup: Dict[str, field_definition_module.FieldDefinition] = ...
+    _fms: fms_module.FileMakerServer
+    _layout: layout_module.Layout
+    _table_name: str
+    _field_definition_lookup: Dict[str, field_definition_module.FieldDefinition]
 
     def __init__(self,
                  layout: layout_module.Layout,

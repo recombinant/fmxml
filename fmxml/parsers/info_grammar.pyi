@@ -38,7 +38,7 @@ class RawValuelist(NamedTuple):
 class RawFMPXMLLayout(NamedTuple):
     errorcode: int
     product: str
-    layout: str
+    layout: RawLayout
     raw_valuelists: List[RawValuelist]
 
 

@@ -98,7 +98,7 @@ class Record:
             command_object = self._fms.create_edit_command(
                 self._parent_record.layout.name,
                 self._parent_record.record_id)
-            command_object.set_delete_portal(self._layout.name + '.' + self._record_id)
+            command_object.set_delete_portal(f'{self._layout.name}.{self._record_id}')
             return command_object.execute()
         else:
             command_object = self._fms.create_delete_record_command(

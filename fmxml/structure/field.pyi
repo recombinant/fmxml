@@ -14,11 +14,11 @@ Value = Union[str, int, Decimal, datetime.datetime, None]
 
 
 class Field:
-    _layout: layout_module.Layout = ...
-    _name: str = ...
-    _field_definition: field_definition_module.FieldDefinition = ...
+    _layout: layout_module.Layout
+    _name: str
+    _field_definition: field_definition_module.FieldDefinition
     # TODO: maybe _value could be something
-    _value: Any = ...
+    _value: Any
 
     def __init__(self,
                  layout: layout_module.Layout,

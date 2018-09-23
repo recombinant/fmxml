@@ -37,7 +37,7 @@ class FieldContainer:
 
     def __init__(self,
                  layout: LayerPortal,
-                 field_value_dict: Optional[FieldValueDict] = ...) \
+                 field_value_dict: Optional[FieldValueDict] = None) \
             -> None:
         ...
 
@@ -57,7 +57,7 @@ class FieldContainer:
             -> None:
         ...
 
-    def get_field_value(self, field_name: str, repetition_number: int = ...) -> Value:
+    def get_field_value(self, field_name: str, repetition_number: int = 0) -> Value:
         ...
 
     def _get_field_repetition_numbers(self, field_name: str) -> Tuple[Dict[int, Field], List[int]]:

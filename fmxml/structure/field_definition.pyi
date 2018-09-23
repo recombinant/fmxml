@@ -3,7 +3,7 @@
 #
 # Stubs for fmxml.structure.field_definition
 #
-from typing import Set, Optional, List
+from typing import Set, Optional, Any
 
 from . import layout as layout_module
 from . import portal as portal_module
@@ -23,25 +23,25 @@ KNOWN_RESULTS: Set[str] = ...
 
 
 class FieldDefinition:
-    _layout: layout_module.Layout = ...
-    _field_name: str = ...
-    _portal: str = ...
-    _auto_entered: bool = ...
-    _global: bool = ...
-    _not_empty: bool = ...
-    _numeric_only: bool = ...
-    _four_digit_year: bool = ...
-    _time_of_day: bool = ...
-    _max_repetitions: int = ...
-    _valuelist_name: Optional[str] = ...
-    _max_characters: int = ...
-    _type: str = ...
-    _result: str = ...
+    _layout: layout_module.Layout
+    _field_name: str
+    _portal: str
+    _auto_entered: bool
+    _global: bool
+    _not_empty: bool
+    _numeric_only: bool
+    _four_digit_year: bool
+    _time_of_day: bool
+    _max_repetitions: int
+    _valuelist_name: Optional[str]
+    _max_characters: int
+    _type: str
+    _result: str
 
     def __init__(self,
                  layout: layout_module.Layout,
-                 raw_field_definition: List[data_grammar_module.RawFieldDefinition],
-                 portal: Optional[portal_module.Portal] = ...) \
+                 raw_field_definition: data_grammar_module.RawFieldDefinition,
+                 portal: Optional[portal_module.Portal] = None) \
             -> None:
         ...
 
@@ -53,7 +53,7 @@ class FieldDefinition:
     def layout(self) -> layout_module.Layout:
         ...
 
-    def munge_value(self, value: Optional[str]) -> None:
+    def munge_value(self, value: Optional[str]) -> Any:
         ...
 
     def set_valuelist_name_(self, valuelist_name: str) -> None:

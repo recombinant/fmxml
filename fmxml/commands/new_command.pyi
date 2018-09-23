@@ -15,7 +15,7 @@ class NewField(NamedTuple):
 
 
 class NewCommand(BaseCommand):
-    _fqfn_list: List[NewCommand]
+    _fqfn_list: List[NewField]
 
     def __init__(self,
                  fms: fms_module.FileMakerServer,
@@ -35,6 +35,6 @@ class NewCommand(BaseCommand):
     def set_field_value(self,
                         field_name: str,
                         value: Any,
-                        repetition_number: int = ...) \
+                        repetition_number: int = 0) \
             -> None:
         ...

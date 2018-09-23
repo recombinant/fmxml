@@ -10,14 +10,14 @@ from ... import fms as fms_module
 
 
 class ScriptDetail:
-    _pre: str = ...
-    _script_name: Optional[str] = ...
-    _script_params: Optional[List[str]] = ...
+    _pre: str
+    _script_name: Optional[str]
+    _script_params: Optional[List[str]]
 
     def __init__(self, pre: str) -> None:
         ...
 
-    def add_command_params(self,
+    def get_command_params(self,
                            command_params: command_container_module.CommandContainer) \
             -> command_container_module.CommandContainer:
         ...
@@ -30,7 +30,7 @@ class ScriptDetail:
 
 
 class ScriptMixin:
-    _script_detail: ScriptDetail = ...
+    _script_detail: ScriptDetail
 
     def __init__(self,
                  fms: fms_module.FileMakerServer,
@@ -50,7 +50,7 @@ class ScriptMixin:
 
 
 class PreFindScriptMixin:
-    _prefind_script_detail: ScriptDetail = ...
+    _prefind_script_detail: ScriptDetail
 
     def __init__(self,
                  fms: fms_module.FileMakerServer,
@@ -70,7 +70,7 @@ class PreFindScriptMixin:
 
 
 class PreSortScriptMixin:
-    _pre_sort_script_detail: ScriptDetail = ...
+    _pre_sort_script_detail: ScriptDetail
 
     def __init__(self,
                  fms: fms_module.FileMakerServer,

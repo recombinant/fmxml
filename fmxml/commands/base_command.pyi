@@ -27,8 +27,8 @@ class BaseCommand1(abc.ABC):
 
 
 class BaseCommand(BaseCommand1):
-    _fms: fms_module.FileMakerServer = ...
-    _layout_name: str = ...
+    _fms: fms_module.FileMakerServer
+    _layout_name: str
 
     def __init__(self,
                  fms: fms_module.FileMakerServer,

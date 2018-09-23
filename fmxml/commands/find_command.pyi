@@ -23,9 +23,9 @@ class FindCommand(SortRulesMixin,
                   PreSortScriptMixin,
                   RelatedsSetsMixin,
                   BaseCommand):
-    _logical_operator: Optional[str] = ...
-    _lay_response: Optional[str] = ...
-    _find_criteria: List[FindCriteria] = ...
+    _logical_operator: Optional[str]
+    _lay_response: Optional[str]
+    _find_criteria: List[FindCriteria]
 
     def __init__(self,
                  fms: fms_module.FileMakerServer,
@@ -51,7 +51,7 @@ class FindCommand(SortRulesMixin,
     def add_find_criterion(self,
                            field_name: str,
                            test_value: Any,
-                           op: Optional[str] = ...) \
+                           op: Optional[str] = None) \
             -> None:
         ...
 

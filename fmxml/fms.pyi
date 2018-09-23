@@ -53,9 +53,11 @@ class FileMakerServer:
                  hostspec: str,
                  username: str,
                  password: str,
-                 db: Optional[str] = ...) \
+                 db: Optional[str] = None) \
             -> None:
         ...
+
+    def close(self) -> None: ...
 
     @property
     def log(self) -> Logger: ...
@@ -102,7 +104,7 @@ class FileMakerServer:
     def create_edit_record_command(self,
                                    layout_name: str,
                                    record_id: Optional[int],
-                                   modification_id: Optional[int] = ...) \
+                                   modification_id: Optional[int] = None) \
             -> edit_command_module.EditCommand: ...
 
     def create_find_records_command(self,

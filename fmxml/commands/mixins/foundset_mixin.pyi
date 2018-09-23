@@ -12,8 +12,8 @@ MaxType = Union[int, str, None]
 
 
 class FoundSetMixin:
-    _max: MaxType = ...
-    _skip: int = ...
+    _max: MaxType
+    _skip: int
 
     def __init__(self,
                  fms: fms_module.FileMakerServer,
@@ -29,12 +29,12 @@ class FoundSetMixin:
     def skip(self) -> int:
         ...
 
-    def set_skip(self, skip: int = ...) -> None:
+    def set_skip(self, skip: int = 0) -> None:
         ...
 
     @property
     def max(self) -> MaxType:
         ...
 
-    def set_max(self, max_: MaxType = ...) -> None:
+    def set_max(self, max_: MaxType = None) -> None:
         ...

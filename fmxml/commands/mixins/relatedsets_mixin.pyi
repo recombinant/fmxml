@@ -12,8 +12,8 @@ MaxType = Union[int, str, None]
 
 
 class RelatedsSetsMixin:
-    _relatedsets_filter: str = ...
-    _relatedsets_max: MaxType = ...
+    _relatedsets_filter: Optional[str]
+    _relatedsets_max: MaxType
 
     def __init__(self,
                  fms: fms_module.FileMakerServer,
@@ -25,8 +25,8 @@ class RelatedsSetsMixin:
             -> command_container_module.CommandContainer:
         ...
 
-    def set_relatedsets_filter(self, filter_: Optional[str] = ...) -> None:
+    def set_relatedsets_filter(self, filter_: Optional[str] = None) -> None:
         ...
 
-    def set_relatedsets_max(self, max_: MaxType = ...) -> None:
+    def set_relatedsets_max(self, max_: MaxType = None) -> None:
         ...

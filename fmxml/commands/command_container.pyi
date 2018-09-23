@@ -19,7 +19,7 @@ class Command:
     cmd: str
     arg: Arg
 
-    def __init__(self, cmd: str, arg: Arg = ...) -> None:
+    def __init__(self, cmd: str, arg: Arg = None) -> None:
         ...
 
 

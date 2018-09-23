@@ -15,7 +15,7 @@ class SortOrder(NamedTuple):
 
 
 class SortRulesMixin:
-    _sort_fields: Dict[str, SortOrder] = ...
+    _sort_fields: Dict[str, SortOrder]
 
     def __init__(self,
                  fms: fms_module.FileMakerServer,
@@ -30,7 +30,7 @@ class SortRulesMixin:
     def add_sort_rule(self,
                       field_name: Optional[str],
                       precedence: Optional[int],
-                      order: Optional[str] = ...) \
+                      order: Optional[str] = None) \
             -> None:
         ...
 

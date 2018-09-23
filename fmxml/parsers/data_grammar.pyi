@@ -25,37 +25,37 @@ class RawDataSource(NamedTuple):
 
 
 class RawFieldDefinition(ElemInitialiser):
-    auto_enter: bool = ...
-    four_digit_year: bool = ...
-    # global: str = ...  # TODO:
-    max_repeat: int = ...
-    name: str = ...
-    not_empty: bool = ...
+    auto_enter: bool
+    four_digit_year: bool
+    # global: str   # TODO:
+    max_repeat: int
+    name: str
+    not_empty: bool
 
-    numeric_only: bool = ...
-    max_characters: Optional[int] = ...
-    result: str = ...
-    time_of_day: str = ...
-    type: str = ...
+    numeric_only: bool
+    max_characters: Optional[int]
+    result: str
+    time_of_day: str
+    type: str
 
     def __init__(self, elem: Element) -> None:
         ...
 
 
 class RawField(ElemInitialiser):
-    name: str = ...
-    data: List[str] = ...  # TODO:
+    name: str
+    data: List[str]  # TODO:
 
     def __init__(self, elem: Element) -> None:
         ...
 
 
 class RawRecord(ElemInitialiser):
-    record_id: int = ...
-    modification_id: int = ...
-    fields: List[RawField] = ...
-    relatedsets: str = ...  # TODO
-    mod_id: int = ...  # TODO: tweak this ?
+    record_id: int
+    modification_id: int
+    fields: List[RawField]
+    relatedsets: str  # TODO
+    mod_id: int  # TODO: tweak this ?
 
     def __init__(self, elem: Element) -> None:
         ...
@@ -80,14 +80,14 @@ class DataGrammarParser(GrammarParserBase):
 
 
 class RawFMResultSet(ElemInitialiser):
-    version: str = ...  # TODO:
-    xmlns: str = ...  # TODO:
-    error: str = ...  # TODO:
-    product: str = ...  # TODO:
-    datasource: RawDataSource = ...
-    resultset: RawResultSet = ...
-    field_definitions: List[RawFieldDefinition] = ...
-    relatedset_definitions: Dict[str, RawFieldDefinition] = ...
+    version: str  # TODO:
+    xmlns: str  # TODO:
+    error: str  # TODO:
+    product: str  # TODO:
+    datasource: RawDataSource
+    resultset: RawResultSet
+    field_definitions: List[RawFieldDefinition]
+    relatedset_definitions: Dict[str, List[RawFieldDefinition]]
 
     def __init__(self, elem: Element) -> None:
         ...
