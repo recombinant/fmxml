@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name='fmxml',
-    version='1.20.0',
+    version='0.1.10',
     packages=['fmxml', 'fmxml.parsers', 'fmxml.commands', 'fmxml.commands.mixins', 'fmxml.structure'],
     url='https://github.com/recombinant/fmxml',
     license='',
