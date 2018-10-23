@@ -29,7 +29,7 @@ Status
 * License :: OSI Approved :: BSD License
 * Natural Language :: English
 * Operating System :: OS Independent
-* Programming Language :: Python :: 3.6 :: Only
+* Programming Language :: Python :: 3.7 :: Only
 * Topic :: Database
 * Topic :: Software Development :: Libraries :: Python Modules
 
@@ -67,11 +67,4 @@ Adding a new record::
             new_command.set_field_value(field_name, value)
         new_command.execute()
 
-
-Note
-====
-
-This project has been set up using PyScaffold 2.5.4. For details and usage
-information on PyScaffold see http://pyscaffold.readthedocs.org/. (The
-resulting framework does not work very well with
-`PyCharm <https://www.jetbrains.com/pycharm/>`_, so it's being dismantled slowly.)
+.. |reg|    unicode:: U+000AE .. REGISTERED SIGN

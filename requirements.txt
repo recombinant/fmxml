@@ -1,2 +1,1 @@
-appdirs
 requests
